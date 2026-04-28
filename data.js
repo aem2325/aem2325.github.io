@@ -16,7 +16,18 @@ const franceData = {
             estimatedCompensation: 46.9,
             earliestReplantDate: '2029',
             dominantWineType: 'Red AOP (65%)',
-            notes: '27% of Gironde applicants seek full exit. Largest program by hectares. Bordeaux AOP land prices fell ~30% in decade prior to 2022. Phase 1: 20-year replant ban.'
+            notes: '27% of Gironde applicants seek full exit. Largest program by hectares. Bordeaux AOP land prices fell ~30% in decade prior to 2022. Phase 1: 20-year replant ban.',
+            // WSET data
+            climate: 'Moderate maritime. Warm Gulf Stream; Landes pine forest moderates Atlantic influence. Key challenges: rainfall during flowering causes poor fruit set and mildew pressure.',
+            grapes: [
+                { name: 'Cabernet Sauvignon', type: 'red', notes: 'Late, tannic, blackcurrant, cedar; thrives on Left Bank gravel' },
+                { name: 'Merlot', type: 'red', notes: 'Early, plush plum, softer tannin; clay-dominant Right Bank' },
+                { name: 'Cabernet Franc', type: 'red', notes: 'Aromatic, floral/herbal lift' },
+                { name: 'Petit Verdot', type: 'red', notes: 'Very late, adds color and tannin in small %' },
+                { name: 'Sémillon', type: 'white', notes: 'Botrytised sweet wines' },
+                { name: 'Sauvignon Blanc', type: 'white', notes: 'Fresh, grassy dry whites' }
+            ],
+            winemaking: 'Blending is essential for climate balance. 225L Bordeaux barriques impart cedar, spice, and tannic structure. Premium wines aged 12–18+ months in new oak. Sweet wines (Sauternes) rely on noble rot concentration and long aging potential.'
         },
         {
             id: 'aude',
@@ -34,7 +45,17 @@ const franceData = {
             estimatedCompensation: 17.9,
             earliestReplantDate: '2029',
             dominantWineType: 'Red IGP/AOP',
-            notes: '16% of Phase 3 applications. Wildfire risk noted in uprooted areas (2025). Worst wildfire in Aude in 70 years partly due to reduced vine density.'
+            notes: '16% of Phase 3 applications. Wildfire risk noted in uprooted areas (2025). Worst wildfire in Aude in 70 years partly due to reduced vine density.',
+            climate: 'Mediterranean; hotter inland, moderated near coast. Limestone and clay soils on rolling hills. Dry but subject to variable heavy rainfall events.',
+            grapes: [
+                { name: 'Carignan', type: 'red', notes: 'Historic backbone variety' },
+                { name: 'Grenache', type: 'red', notes: 'Ripe red fruit, high alcohol' },
+                { name: 'Syrah', type: 'red', notes: 'Structure and spice in blends' },
+                { name: 'Mourvèdre', type: 'red', notes: 'Meaty, gamey character' },
+                { name: 'Chardonnay', type: 'white', notes: 'Used in white blends' },
+                { name: 'Sauvignon Blanc', type: 'white', notes: 'White IGP varietals' }
+            ],
+            winemaking: 'Shift from bulk to quality production. Carbonic maceration used for fruit-forward styles. Increasing use of oak for Syrah blends. Wines range from simple varietals to structured Corbières-style reds with herbal, garrigue character.'
         },
         {
             id: 'gard',
@@ -52,7 +73,18 @@ const franceData = {
             estimatedCompensation: 13.4,
             earliestReplantDate: '2029',
             dominantWineType: 'Red (Côtes du Rhône)',
-            notes: '12% of Phase 3 applications. Significant Côtes du Rhône volume removed. Part of Occitanie region representing >50% of national surfaces.'
+            notes: '12% of Phase 3 applications. Significant Côtes du Rhône volume removed. Part of Occitanie region representing >50% of national surfaces.',
+            climate: 'Mediterranean with Rhône influence inland. Warm days, cooler nights inland. Alluvial plains and galets roulés (rounded stones) in places that retain heat.',
+            grapes: [
+                { name: 'Grenache', type: 'red', notes: 'Dominant variety, ripe red fruit' },
+                { name: 'Syrah', type: 'red', notes: 'Adds structure and spice' },
+                { name: 'Mourvèdre', type: 'red', notes: 'Depth and tannic grip' },
+                { name: 'Carignan', type: 'red', notes: 'Blending component' },
+                { name: 'Viognier', type: 'white', notes: 'Aromatic whites' },
+                { name: 'Grenache Blanc', type: 'white', notes: 'Rich, textured whites' },
+                { name: 'Roussanne', type: 'white', notes: 'Complex white blends' }
+            ],
+            winemaking: 'Similar to southern Rhône: blending for balance and structure. Maceration for color extraction in Grenache-heavy wines. Increasing use of partial oak aging for premium cuvées.'
         },
         {
             id: 'herault',
@@ -70,7 +102,17 @@ const franceData = {
             estimatedCompensation: 11.2,
             earliestReplantDate: '2029',
             dominantWineType: 'Red & Rosé AOP',
-            notes: '10% of Phase 3 applications. Picpoul (white) largely excluded. Languedoc region significant volume in overall program.'
+            notes: '10% of Phase 3 applications. Picpoul (white) largely excluded from uprooting program. Languedoc region is significant volume in overall program.',
+            climate: 'Strong Mediterranean influence; hot, dry summers. Limestone plateaus covered in garrigue vegetation. Coastal areas moderated by sea breezes.',
+            grapes: [
+                { name: 'Syrah', type: 'red', notes: 'Structure and spice' },
+                { name: 'Grenache', type: 'red', notes: 'Ripe red fruit, high alcohol' },
+                { name: 'Mourvèdre', type: 'red', notes: 'Meaty, earthy complexity' },
+                { name: 'Carignan', type: 'red', notes: 'Old vine quality and acidity' },
+                { name: 'Picpoul', type: 'white', notes: 'Crisp, saline coastal whites' },
+                { name: 'Grenache Blanc', type: 'white', notes: 'Rich, textured whites' }
+            ],
+            winemaking: 'Dry, high-alcohol reds with spice and herbal complexity. Picpoul de Pinet: crisp, saline, lemon-driven whites from coastal influence. Some carbonic maceration; increasing precision viticulture for freshness retention.'
         },
         {
             id: 'pyr-orientales',
@@ -88,7 +130,18 @@ const franceData = {
             estimatedCompensation: 7.8,
             earliestReplantDate: '2029',
             dominantWineType: 'Red & Fortified',
-            notes: '7% of Phase 3 applications. Fortified wine market in long-term decline. Focus on market stabilization.'
+            notes: '7% of Phase 3 applications. Fortified wine market in long-term decline. Focus on market stabilization.',
+            climate: 'Mediterranean with strong continental and altitude influence from Pyrenees. Hot, dry, and windy (Tramontane reduces disease pressure). Poor schist and granite soils.',
+            grapes: [
+                { name: 'Grenache Noir', type: 'red', notes: 'Dominant, ripe red fruit, high alcohol' },
+                { name: 'Carignan', type: 'red', notes: 'Old vines, acidity and structure' },
+                { name: 'Syrah', type: 'red', notes: 'Structure and spice' },
+                { name: 'Mourvèdre', type: 'red', notes: 'Meaty, gamey character' },
+                { name: 'Grenache Blanc', type: 'white', notes: 'Rich white blends' },
+                { name: 'Macabeu', type: 'white', notes: 'Fresh aromatic whites' },
+                { name: 'Vermentino', type: 'white', notes: 'Saline, Mediterranean whites' }
+            ],
+            winemaking: 'Low-yield bush vines (gobelet). Concentrated fruit from heat stress. Fortified Vins Doux Naturels (Banyuls, Rivesaltes) via mutage — spirit addition mid-fermentation. Also produces structured, ripe dry reds with high alcohol and garrigue aromatics.'
         },
         {
             id: 'gers',
@@ -106,7 +159,15 @@ const franceData = {
             estimatedCompensation: 4.5,
             earliestReplantDate: '2029',
             dominantWineType: 'White (Armagnac)',
-            notes: '4% of Phase 3 applications. 33% full exit rate — highest nationally. Aging grower demographics significant factor.'
+            notes: '4% of Phase 3 applications. 33% full exit rate — highest nationally. Aging grower demographics significant factor.',
+            climate: 'Oceanic transitioning to continental. Warm summers, wetter autumns. Sandy-clay soils and boulbènes typical of Gascony.',
+            grapes: [
+                { name: 'Ugni Blanc', type: 'white', notes: 'Dominant distillation grape' },
+                { name: 'Baco Blanc', type: 'white', notes: 'Key for Armagnac, adds rustic fruit structure' },
+                { name: 'Colombard', type: 'white', notes: 'Aromatic, fresh Côtes de Gascogne whites' },
+                { name: 'Folle Blanche', type: 'white', notes: 'Historic Armagnac variety' }
+            ],
+            winemaking: 'Base wines designed for distillation into Armagnac. Baco adds structure and rustic fruit character. Some Côtes de Gascogne wines: fresh, aromatic whites with stainless steel fermentation to preserve fruit.'
         },
         {
             id: 'vaucluse',
@@ -124,7 +185,18 @@ const franceData = {
             estimatedCompensation: 3.4,
             earliestReplantDate: '2029',
             dominantWineType: 'Red AOP',
-            notes: "3% of Phase 3 applications. Near Châteauneuf-du-Pape; quality reds under price pressure."
+            notes: "3% of Phase 3 applications. Near Châteauneuf-du-Pape; quality reds under price pressure.",
+            climate: 'Mediterranean; Mistral wind reduces disease pressure. Hot, dry summers with galets roulés (large rounded stones) that store heat and radiate it back at night.',
+            grapes: [
+                { name: 'Grenache', type: 'red', notes: 'Dominant, ripe red fruit, high alcohol' },
+                { name: 'Syrah', type: 'red', notes: 'Structure and black pepper spice' },
+                { name: 'Mourvèdre', type: 'red', notes: 'Meaty depth and tannic grip' },
+                { name: 'Grenache Blanc', type: 'white', notes: 'Rich, textured whites' },
+                { name: 'Roussanne', type: 'white', notes: 'Complex, herbal white blends' },
+                { name: 'Marsanne', type: 'white', notes: 'Full-bodied, nutty whites' },
+                { name: 'Viognier', type: 'white', notes: 'Aromatic, floral whites' }
+            ],
+            winemaking: 'Blending defines structure (GSM style). High alcohol, ripe red fruit, garrigue herbs. Partial whole-bunch fermentation in Syrah for aromatics. Oak use varies — large foudres are common for southern Rhône styles.'
         },
         {
             id: 'tarn',
@@ -142,7 +214,17 @@ const franceData = {
             estimatedCompensation: 2.2,
             earliestReplantDate: '2029',
             dominantWineType: 'Red & White',
-            notes: '2% of Phase 3 applications. Smaller volume; structural issues in region.'
+            notes: '2% of Phase 3 applications. Smaller volume; structural issues in region.',
+            climate: 'Mixed Atlantic and continental influences. Rolling hills with clay-limestone soils. More rainfall than Mediterranean south, giving fresher acidity.',
+            grapes: [
+                { name: 'Braucol (Fer Servadou)', type: 'red', notes: 'Local variety, firm tannins' },
+                { name: 'Duras', type: 'red', notes: 'Indigenous Gaillac variety' },
+                { name: 'Syrah', type: 'red', notes: 'Structure and spice' },
+                { name: 'Gamay', type: 'red', notes: 'Light, fruit-forward reds' },
+                { name: 'Mauzac', type: 'white', notes: 'Traditional Gaillac white, sparkling styles' },
+                { name: "Loin de l'Oeil", type: 'white', notes: 'Indigenous aromatic white' }
+            ],
+            winemaking: 'Gaillac wines include traditional oxidative styles and sweet wines from passerillage (late harvest drying). Carbonic maceration common for reds. Whites can be fresh and aromatic or traditionally oxidative with nutty complexity.'
         },
         {
             id: 'drome',
@@ -160,7 +242,15 @@ const franceData = {
             estimatedCompensation: 2.0,
             earliestReplantDate: '2029',
             dominantWineType: 'Red AOP',
-            notes: 'Part of Rhône-Provence region. Côtes du Rhône quality wines under market pressure.'
+            notes: 'Part of Rhône-Provence region. Côtes du Rhône quality wines under market pressure.',
+            climate: 'Transitional: continental influence increasing northward. Steeper granite slopes in north, more Mediterranean influence in south. Cooler nights than the southern Rhône.',
+            grapes: [
+                { name: 'Syrah', type: 'red', notes: 'Dominant red: black pepper, violet, olive tapenade' },
+                { name: 'Viognier', type: 'white', notes: 'Aromatic, floral, peach and apricot' },
+                { name: 'Marsanne', type: 'white', notes: 'Full-bodied, nutty, long-aging whites' },
+                { name: 'Roussanne', type: 'white', notes: 'Herbal, complex white blends' }
+            ],
+            winemaking: 'Syrah shows more black pepper, violet, and olive tapenade — a cooler expression than the southern Rhône. Higher acidity, more structured tannins. More single-varietal focus. Oak use is moderate, used for structure rather than flavor impartation.'
         },
         {
             id: 'lot-et-garonne',
@@ -178,7 +268,16 @@ const franceData = {
             estimatedCompensation: 1.7,
             earliestReplantDate: '2029',
             dominantWineType: 'Red AOP',
-            notes: 'Part of Nouvelle-Aquitaine region. Smaller appellation volumes.'
+            notes: 'Part of Nouvelle-Aquitaine region. Smaller appellation volumes.',
+            climate: 'Transitional oceanic to continental. Warm summers with moderate Atlantic rainfall. Clay-limestone and alluvial soils along the Garonne and Lot river valleys.',
+            grapes: [
+                { name: 'Merlot', type: 'red', notes: 'Soft, plum-driven; dominant in blends' },
+                { name: 'Cabernet Sauvignon', type: 'red', notes: 'Structure and blackcurrant character' },
+                { name: 'Cabernet Franc', type: 'red', notes: 'Floral, herbal lift' },
+                { name: 'Malbec', type: 'red', notes: 'Local Duras variety, inky and spicy' },
+                { name: 'Sauvignon Blanc', type: 'white', notes: 'Fresh, crisp whites' }
+            ],
+            winemaking: 'Bordeaux-influenced blending styles. Medium-bodied reds with soft tannins. Some oak aging for structure. Buzet cooperatives dominate production. Wines offer value alternatives to Bordeaux at similar styles.'
         },
         {
             id: 'charente',
@@ -196,10 +295,17 @@ const franceData = {
             estimatedCompensation: 3.9,
             earliestReplantDate: '2029',
             dominantWineType: 'Cognac (White)',
-            notes: 'Limited eligibility due to AOC protection. Cognac production tied to specific regulations.'
+            notes: 'Limited eligibility due to AOC protection. Cognac production tied to specific regulations.',
+            climate: 'Oceanic maritime climate; mild winters, humid conditions, moderate summers. Chalky limestone soils (Champagne de Cognac, Grande Champagne) ideal for distillation base wines.',
+            grapes: [
+                { name: 'Ugni Blanc', type: 'white', notes: 'Dominant: high acid, low alcohol, ideal for distillation' },
+                { name: 'Folle Blanche', type: 'white', notes: 'Historic Cognac variety, aromatic' },
+                { name: 'Colombard', type: 'white', notes: 'Secondary blending variety' }
+            ],
+            winemaking: 'Wines are low alcohol, high acidity — purpose-built for distillation into Cognac. Minimal winemaking intervention; stainless steel fermentation. Double distillation in copper pot stills. Rare table wines are light, tart, and neutral.'
         }
     ],
-
+ 
     nationalSummary: {
         totalHectaresApplied: 27457,
         totalHectaresPermanent: 10001,
