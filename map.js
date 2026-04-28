@@ -2,7 +2,7 @@
 const map = L.map('map', {
     zoomControl: true
 }).setView([46.2, 2.2], 6);
- 
+
 // ── Basemap ──────────────────────────────────────────────────────────────────
 // CartoDB Positron (no labels variant) — white/light-grey, no roads,
 // no terrain texture, no satellite, no country outlines drawn in the sea.
@@ -11,19 +11,19 @@ L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png
     subdomains: 'abcd',
     maxZoom: 19
 }).addTo(map);
- 
+
 // ── Phase → color (Pantone palette) ─────────────────────────────────────────
 const phaseColors = {
     'Phase 1 (2023) + Phase 2 (2024)': '#BF1722',   // Pantone True Red
-    'Phase 2 (2024)':                  '#00239C',   // Pantone Dark Blue C
+    'Phase 2 (2024)':                  '#F6D500',   // Pantone Minion Yellow TM
     'Phase 2 (2024) — Limited Eligibility': '#3B2E8D' // Pantone 276C
 };
- 
+
 // ── Markers ──────────────────────────────────────────────────────────────────
 function initializeMarkers() {
     franceData.regions.forEach(region => {
         const color = phaseColors[region.programPhase] || '#555555';
- 
+
         const marker = L.circleMarker(
             [region.coordinates.latitude, region.coordinates.longitude],
             {
@@ -35,11 +35,11 @@ function initializeMarkers() {
                 fillOpacity: 0.9
             }
         ).addTo(map);
- 
+
         marker.on('click', function () {
             displayRegionData(region);
         });
- 
+
         // Region name label
         L.tooltip({
             permanent: true,
@@ -52,15 +52,15 @@ function initializeMarkers() {
         .addTo(map);
     });
 }
- 
+
 // ── Sidebar ───────────────────────────────────────────────────────────────────
 function displayRegionData(region) {
     const sidebar        = document.getElementById('sidebar');
     const sidebarTitle   = document.getElementById('sidebarTitle');
     const sidebarContent = document.getElementById('sidebarContent');
- 
+
     sidebarTitle.textContent = region.name;
- 
+
     const html = `
         <div class="data-section">
             <h3>Program Info</h3>
@@ -81,7 +81,7 @@ function displayRegionData(region) {
                 <div class="data-value">${region.dominantWineType}</div>
             </div>
         </div>
- 
+
         <div class="data-section">
             <h3>Vineyard Data</h3>
             <div class="data-item">
@@ -109,7 +109,7 @@ function displayRegionData(region) {
                 <div class="data-value">${region.keyAppellations}</div>
             </div>
         </div>
- 
+
         <div class="data-section">
             <h3>Compensation</h3>
             <div class="data-item">
@@ -121,26 +121,26 @@ function displayRegionData(region) {
                 <div class="data-value">€${region.estimatedCompensation}M</div>
             </div>
         </div>
- 
+
         <div class="data-section">
             <h3>Notes</h3>
             <p class="notes-text">${region.notes}</p>
         </div>
     `;
- 
+
     sidebarContent.innerHTML = html;
     sidebar.classList.add('active');
 }
- 
+
 // Close sidebar
 document.getElementById('closeBtn').addEventListener('click', function () {
     document.getElementById('sidebar').classList.remove('active');
 });
- 
+
 // ── Legend ────────────────────────────────────────────────────────────────────
 function addLegend() {
     const legend = L.control({ position: 'bottomleft' });
- 
+
     legend.onAdd = function () {
         const div = L.DomUtil.create('div', 'info legend');
         div.style.cssText = [
@@ -154,24 +154,26 @@ function addLegend() {
             'font-style:normal',
             'border-top:3px solid #BF1722'
         ].join(';');
- 
+
         let html = '<strong style="display:block;margin-bottom:8px;color:#00239C;font-family:Arial,Helvetica,sans-serif;font-style:normal;letter-spacing:0.05em;text-transform:uppercase;font-size:11px;">Program Phase</strong>';
- 
+
         Object.entries(phaseColors).forEach(([phase, color]) => {
+            // Use a dark border on the yellow dot so it reads against the white legend bg
+            const border = color === '#F6D500' ? '1px solid #bba800' : 'none';
             html += `
                 <div style="margin-bottom:4px;display:flex;align-items:center;gap:8px;font-style:normal;">
-                    <span style="background:${color};width:12px;height:12px;border-radius:50%;display:inline-block;flex-shrink:0;"></span>
+                    <span style="background:${color};width:12px;height:12px;border-radius:50%;display:inline-block;flex-shrink:0;border:${border};box-sizing:border-box;"></span>
                     <span style="color:#1a1a2e;font-style:normal;">${phase}</span>
                 </div>`;
         });
- 
+
         div.innerHTML = html;
         return div;
     };
- 
+
     legend.addTo(map);
 }
- 
+
 // ── Init ──────────────────────────────────────────────────────────────────────
 window.addEventListener('load', function () {
     initializeMarkers();
