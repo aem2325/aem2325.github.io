@@ -2,30 +2,62 @@
 const map = L.map('map', {
     zoomControl: true
 }).setView([44.5, 1.8], 7);
-
+ 
 // ── Basemap ──────────────────────────────────────────────────────────────────
 L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/">CARTO</a>',
     subdomains: 'abcd',
     maxZoom: 19
 }).addTo(map);
-
+ 
 // ── Phase → color (Pantone palette) ─────────────────────────────────────────
 const phaseColors = {
     'Phase 1 (2023) + Phase 2 (2024)': '#BF1722',        // Pantone True Red
     'Phase 2 (2024)':                  '#F6D500',        // Pantone Minion Yellow TM
     'Phase 2 (2024) — Limited Eligibility': '#3B2E8D'   // Pantone 276C
 };
-
+ 
+// ── Grape color: red wine = Pantone True Red, white wine = Pantone Minion Yellow
+const grapeColors = {
+    red:   { bg: '#BF1722', text: '#ffffff', border: '#8a1018' },
+    white: { bg: '#F6D500', text: '#1a1a1a', border: '#bba800' }
+};
+ 
+// ── Build grape pill HTML ─────────────────────────────────────────────────────
+function buildGrapePills(grapes) {
+    return grapes.map(g => {
+        const c = grapeColors[g.type];
+        return `<span class="grape-pill" style="background:${c.bg};color:${c.text};border:1px solid ${c.border};" title="${g.notes}">${g.name}</span>`;
+    }).join('');
+}
+ 
+// ── Hover tooltip content ─────────────────────────────────────────────────────
+function buildTooltipHTML(region) {
+    const grapePills = region.grapes ? buildGrapePills(region.grapes) : '';
+    return `
+        <div class="hover-tooltip">
+            <div class="ht-title">${region.name}</div>
+            <div class="ht-row">
+                <span class="ht-label">Permanent removal</span>
+                <span class="ht-value">${region.hectaresPermanent.toLocaleString()} ha</span>
+            </div>
+            <div class="ht-row">
+                <span class="ht-label">Partial removal</span>
+                <span class="ht-value">${region.hectaresPartial.toLocaleString()} ha</span>
+            </div>
+            ${grapePills ? `<div class="ht-grapes">${grapePills}</div>` : ''}
+        </div>
+    `;
+}
+ 
 // ── AOC Region Boundaries ────────────────────────────────────────────────────
-// Loaded from wine_regions.geojson — light blue outlines, no fill, grey labels
 function loadAOCBoundaries() {
     fetch('wine_regions.geojson')
         .then(r => r.json())
         .then(data => {
-            const aocLayer = L.geoJSON(data, {
+            L.geoJSON(data, {
                 style: {
-                    color: '#7BBFEA',       // light blue border
+                    color: '#7BBFEA',
                     weight: 1.8,
                     opacity: 0.85,
                     fillColor: 'transparent',
@@ -33,11 +65,9 @@ function loadAOCBoundaries() {
                     dashArray: '4 3'
                 },
                 onEachFeature: function(feature, layer) {
-                    // Add a permanent label at the centroid of each region
                     const name = feature.properties.name;
                     const center = layer.getBounds().getCenter();
-
-                    const label = L.marker(center, {
+                    L.marker(center, {
                         icon: L.divIcon({
                             className: 'aoc-label',
                             html: `<span>${name}</span>`,
@@ -49,20 +79,19 @@ function loadAOCBoundaries() {
                     }).addTo(map);
                 }
             }).addTo(map);
-
-            // Bring markers to front after layer loads
+ 
             map.eachLayer(l => {
                 if (l instanceof L.CircleMarker) l.bringToFront();
             });
         })
         .catch(err => console.warn('AOC GeoJSON failed to load:', err));
 }
-
+ 
 // ── Markers ──────────────────────────────────────────────────────────────────
 function initializeMarkers() {
     franceData.regions.forEach(region => {
         const color = phaseColors[region.programPhase] || '#555555';
-
+ 
         const marker = L.circleMarker(
             [region.coordinates.latitude, region.coordinates.longitude],
             {
@@ -74,12 +103,22 @@ function initializeMarkers() {
                 fillOpacity: 0.9
             }
         ).addTo(map);
-
+ 
+        // Click → open sidebar
         marker.on('click', function () {
             displayRegionData(region);
         });
-
-        // Region name label
+ 
+        // Hover → show tooltip
+        marker.bindTooltip(buildTooltipHTML(region), {
+            direction: 'top',
+            permanent: false,
+            opacity: 1,
+            className: 'hover-tooltip-wrapper',
+            offset: [0, -18]
+        });
+ 
+        // Permanent region name label
         L.tooltip({
             permanent: true,
             direction: 'top',
@@ -91,15 +130,30 @@ function initializeMarkers() {
         .addTo(map);
     });
 }
-
+ 
 // ── Sidebar ───────────────────────────────────────────────────────────────────
 function displayRegionData(region) {
     const sidebar        = document.getElementById('sidebar');
     const sidebarTitle   = document.getElementById('sidebarTitle');
     const sidebarContent = document.getElementById('sidebarContent');
-
+ 
     sidebarTitle.textContent = region.name;
-
+ 
+    // Build grape pills for sidebar
+    const grapePillsHTML = region.grapes
+        ? `<div class="grape-pills-container">${buildGrapePills(region.grapes)}</div>`
+        : '';
+ 
+    // Build individual grape detail rows
+    const grapeDetailsHTML = region.grapes ? region.grapes.map(g => {
+        const c = grapeColors[g.type];
+        return `
+            <div class="grape-detail-row">
+                <span class="grape-pill grape-pill-sm" style="background:${c.bg};color:${c.text};border:1px solid ${c.border};">${g.name}</span>
+                <span class="grape-detail-note">${g.notes}</span>
+            </div>`;
+    }).join('') : '';
+ 
     const html = `
         <div class="data-section">
             <h3>Program Info</h3>
@@ -120,7 +174,7 @@ function displayRegionData(region) {
                 <div class="data-value">${region.dominantWineType}</div>
             </div>
         </div>
-
+ 
         <div class="data-section">
             <h3>Vineyard Data</h3>
             <div class="data-item">
@@ -148,7 +202,7 @@ function displayRegionData(region) {
                 <div class="data-value">${region.keyAppellations}</div>
             </div>
         </div>
-
+ 
         <div class="data-section">
             <h3>Compensation</h3>
             <div class="data-item">
@@ -160,26 +214,50 @@ function displayRegionData(region) {
                 <div class="data-value">€${region.estimatedCompensation}M</div>
             </div>
         </div>
-
+ 
+        <div class="data-section">
+            <h3>Climate &amp; Terroir</h3>
+            <p class="notes-text">${region.climate || 'No data available.'}</p>
+        </div>
+ 
+        <div class="data-section">
+            <h3>Key Grape Varieties</h3>
+            ${grapePillsHTML}
+            <div class="grape-details">
+                ${grapeDetailsHTML}
+            </div>
+            <div class="grape-legend">
+                <span class="grape-pill grape-pill-sm" style="background:#BF1722;color:#fff;border:1px solid #8a1018;">Red</span>
+                <span class="grape-legend-text">Red wine grape</span>
+                <span class="grape-pill grape-pill-sm" style="background:#F6D500;color:#1a1a1a;border:1px solid #bba800;">White</span>
+                <span class="grape-legend-text">White wine grape</span>
+            </div>
+        </div>
+ 
+        <div class="data-section">
+            <h3>Winemaking &amp; Style</h3>
+            <p class="notes-text">${region.winemaking || 'No data available.'}</p>
+        </div>
+ 
         <div class="data-section">
             <h3>Notes</h3>
             <p class="notes-text">${region.notes}</p>
         </div>
     `;
-
+ 
     sidebarContent.innerHTML = html;
     sidebar.classList.add('active');
 }
-
+ 
 // Close sidebar
 document.getElementById('closeBtn').addEventListener('click', function () {
     document.getElementById('sidebar').classList.remove('active');
 });
-
+ 
 // ── Legend ────────────────────────────────────────────────────────────────────
 function addLegend() {
     const legend = L.control({ position: 'bottomleft' });
-
+ 
     legend.onAdd = function () {
         const div = L.DomUtil.create('div', 'info legend');
         div.style.cssText = [
@@ -193,9 +271,9 @@ function addLegend() {
             'font-style:normal',
             'border-top:3px solid #BF1722'
         ].join(';');
-
+ 
         let html = '<strong style="display:block;margin-bottom:8px;color:#00239C;font-family:Arial,Helvetica,sans-serif;font-style:normal;letter-spacing:0.05em;text-transform:uppercase;font-size:11px;">Program Phase</strong>';
-
+ 
         Object.entries(phaseColors).forEach(([phase, color]) => {
             const border = color === '#F6D500' ? '1px solid #bba800' : 'none';
             html += `
@@ -204,8 +282,7 @@ function addLegend() {
                     <span style="color:#1a1a2e;font-style:normal;">${phase}</span>
                 </div>`;
         });
-
-        // AOC boundary legend entry
+ 
         html += `
             <div style="margin-top:10px;padding-top:8px;border-top:1px solid #eee;">
                 <strong style="display:block;margin-bottom:6px;color:#00239C;font-family:Arial,Helvetica,sans-serif;font-style:normal;letter-spacing:0.05em;text-transform:uppercase;font-size:11px;">Wine Regions</strong>
@@ -216,17 +293,18 @@ function addLegend() {
                     <span style="color:#1a1a2e;font-style:normal;">AOC Boundary (approx.)</span>
                 </div>
             </div>`;
-
+ 
         div.innerHTML = html;
         return div;
     };
-
+ 
     legend.addTo(map);
 }
-
+ 
 // ── Init ──────────────────────────────────────────────────────────────────────
 window.addEventListener('load', function () {
     loadAOCBoundaries();
     initializeMarkers();
     addLegend();
 });
+ 
