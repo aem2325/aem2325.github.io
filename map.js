@@ -1,43 +1,46 @@
 // Initialize map centered on France
-const map = L.map('map').setView([46.2, 2.2], 6);
+const map = L.map('map', {
+    zoomControl: true
+}).setView([46.2, 2.2], 6);
  
-// Add OpenStreetMap base layer
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '© OpenStreetMap contributors',
+// ── Basemap ──────────────────────────────────────────────────────────────────
+// CartoDB Positron (no labels variant) — white/light-grey, no roads,
+// no terrain texture, no satellite, no country outlines drawn in the sea.
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/">CARTO</a>',
+    subdomains: 'abcd',
     maxZoom: 19
 }).addTo(map);
  
-// Phase color mapping
+// ── Phase → color (Pantone palette) ─────────────────────────────────────────
 const phaseColors = {
-    'Phase 1 (2023) + Phase 2 (2024)': '#10b981',
-    'Phase 2 (2024)': '#3b82f6',
-    'Phase 2 (2024) — Limited Eligibility': '#f59e0b'
+    'Phase 1 (2023) + Phase 2 (2024)': '#BF1722',   // Pantone True Red
+    'Phase 2 (2024)':                  '#00239C',   // Pantone Dark Blue C
+    'Phase 2 (2024) — Limited Eligibility': '#3B2E8D' // Pantone 276C
 };
  
-// Add markers for each region
+// ── Markers ──────────────────────────────────────────────────────────────────
 function initializeMarkers() {
     franceData.regions.forEach(region => {
-        const color = phaseColors[region.programPhase] || '#6b7280';
+        const color = phaseColors[region.programPhase] || '#555555';
  
-        // Create circle marker
         const marker = L.circleMarker(
             [region.coordinates.latitude, region.coordinates.longitude],
             {
                 radius: 14,
                 fillColor: color,
-                color: '#fff',
+                color: '#FFFFFF',
                 weight: 2.5,
                 opacity: 1,
-                fillOpacity: 0.85
+                fillOpacity: 0.9
             }
         ).addTo(map);
  
-        // Add click event to show sidebar
         marker.on('click', function () {
             displayRegionData(region);
         });
  
-        // Add label tooltip
+        // Region name label
         L.tooltip({
             permanent: true,
             direction: 'top',
@@ -50,10 +53,10 @@ function initializeMarkers() {
     });
 }
  
-// Display region data in sidebar
+// ── Sidebar ───────────────────────────────────────────────────────────────────
 function displayRegionData(region) {
-    const sidebar = document.getElementById('sidebar');
-    const sidebarTitle = document.getElementById('sidebarTitle');
+    const sidebar        = document.getElementById('sidebar');
+    const sidebarTitle   = document.getElementById('sidebarTitle');
     const sidebarContent = document.getElementById('sidebarContent');
  
     sidebarTitle.textContent = region.name;
@@ -129,32 +132,37 @@ function displayRegionData(region) {
     sidebar.classList.add('active');
 }
  
-// Close sidebar button
+// Close sidebar
 document.getElementById('closeBtn').addEventListener('click', function () {
     document.getElementById('sidebar').classList.remove('active');
 });
  
-// Add legend
+// ── Legend ────────────────────────────────────────────────────────────────────
 function addLegend() {
     const legend = L.control({ position: 'bottomleft' });
  
     legend.onAdd = function () {
         const div = L.DomUtil.create('div', 'info legend');
-        div.style.backgroundColor = '#fff';
-        div.style.padding = '12px 16px';
-        div.style.borderRadius = '4px';
-        div.style.boxShadow = '0 2px 6px rgba(0,0,0,0.15)';
-        div.style.fontSize = '13px';
-        div.style.lineHeight = '1.8';
-        div.style.fontWeight = '500';
+        div.style.cssText = [
+            'background:#ffffff',
+            'padding:12px 16px',
+            'border-radius:4px',
+            'box-shadow:0 2px 8px rgba(0,35,156,0.15)',
+            'font-size:12px',
+            'line-height:1.9',
+            'font-family:Arial,Helvetica,sans-serif',
+            'font-style:normal',
+            'border-top:3px solid #BF1722'
+        ].join(';');
  
-        let html = '<strong style="display:block;margin-bottom:8px;color:#1a1a1a;">Program Phase</strong>';
+        let html = '<strong style="display:block;margin-bottom:8px;color:#00239C;font-family:Arial,Helvetica,sans-serif;font-style:normal;letter-spacing:0.05em;text-transform:uppercase;font-size:11px;">Program Phase</strong>';
  
         Object.entries(phaseColors).forEach(([phase, color]) => {
-            html += `<div style="margin-bottom:4px;">
-                <i style="background:${color};width:11px;height:11px;border-radius:50%;display:inline-block;margin-right:8px;"></i>
-                ${phase}
-            </div>`;
+            html += `
+                <div style="margin-bottom:4px;display:flex;align-items:center;gap:8px;font-style:normal;">
+                    <span style="background:${color};width:12px;height:12px;border-radius:50%;display:inline-block;flex-shrink:0;"></span>
+                    <span style="color:#1a1a2e;font-style:normal;">${phase}</span>
+                </div>`;
         });
  
         div.innerHTML = html;
@@ -164,7 +172,7 @@ function addLegend() {
     legend.addTo(map);
 }
  
-// Initialize on page load
+// ── Init ──────────────────────────────────────────────────────────────────────
 window.addEventListener('load', function () {
     initializeMarkers();
     addLegend();
