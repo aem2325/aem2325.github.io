@@ -272,6 +272,139 @@ em, i, cite, .leaflet-tooltip {
     border-radius: 3px;
 }
  
+/* ===== Grape Pills ===== */
+.grape-pills-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 12px;
+}
+ 
+.grape-pill {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-style: normal;
+    font-size: 0.75rem;
+    font-weight: bold;
+    white-space: nowrap;
+    cursor: default;
+    letter-spacing: 0.02em;
+}
+ 
+.grape-pill-sm {
+    font-size: 0.68rem;
+    padding: 2px 8px;
+}
+ 
+/* ===== Grape Detail Rows ===== */
+.grape-details {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 10px;
+}
+ 
+.grape-detail-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+}
+ 
+.grape-detail-note {
+    font-family: Arial, Helvetica, sans-serif;
+    font-style: normal;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+    padding-top: 2px;
+}
+ 
+/* ===== Grape Legend ===== */
+.grape-legend {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--border);
+    flex-wrap: wrap;
+}
+ 
+.grape-legend-text {
+    font-family: Arial, Helvetica, sans-serif;
+    font-style: normal;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    margin-right: 8px;
+}
+ 
+/* ===== Hover Tooltip ===== */
+.hover-tooltip-wrapper {
+    background: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+}
+ 
+.hover-tooltip-wrapper::before,
+.hover-tooltip-wrapper::after {
+    display: none !important;
+}
+ 
+.hover-tooltip {
+    background: #ffffff;
+    border: 1px solid var(--border);
+    border-top: 3px solid var(--dark-blue);
+    border-radius: 4px;
+    padding: 10px 14px;
+    box-shadow: 0 4px 12px rgba(0,35,156,0.13);
+    min-width: 200px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-style: normal;
+}
+ 
+.ht-title {
+    font-family: 'Milker', sans-serif;
+    font-size: 0.9rem;
+    color: var(--dark-blue);
+    margin-bottom: 8px;
+    font-style: normal;
+}
+ 
+.ht-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 4px;
+}
+ 
+.ht-label {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-style: normal;
+}
+ 
+.ht-value {
+    font-size: 0.82rem;
+    color: var(--text-body);
+    font-weight: bold;
+    font-style: normal;
+}
+ 
+.ht-grapes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--border);
+}
+ 
 /* ===== Responsive ===== */
 @media (max-width: 768px) {
     .header-content h1 {
@@ -294,3 +427,4 @@ em, i, cite, .leaflet-tooltip {
         transform: translateY(0);
     }
 }
+ 
