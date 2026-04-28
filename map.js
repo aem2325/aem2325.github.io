@@ -1,11 +1,9 @@
 // Initialize map centered on France
 const map = L.map('map', {
     zoomControl: true
-}).setView([46.2, 2.2], 6);
+}).setView([44.5, 1.8], 7);
 
 // ── Basemap ──────────────────────────────────────────────────────────────────
-// CartoDB Positron (no labels variant) — white/light-grey, no roads,
-// no terrain texture, no satellite, no country outlines drawn in the sea.
 L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/">CARTO</a>',
     subdomains: 'abcd',
@@ -14,10 +12,51 @@ L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png
 
 // ── Phase → color (Pantone palette) ─────────────────────────────────────────
 const phaseColors = {
-    'Phase 1 (2023) + Phase 2 (2024)': '#BF1722',   // Pantone True Red
-    'Phase 2 (2024)':                  '#F6D500',   // Pantone Minion Yellow TM
-    'Phase 2 (2024) — Limited Eligibility': '#3B2E8D' // Pantone 276C
+    'Phase 1 (2023) + Phase 2 (2024)': '#BF1722',        // Pantone True Red
+    'Phase 2 (2024)':                  '#F6D500',        // Pantone Minion Yellow TM
+    'Phase 2 (2024) — Limited Eligibility': '#3B2E8D'   // Pantone 276C
 };
+
+// ── AOC Region Boundaries ────────────────────────────────────────────────────
+// Loaded from wine_regions.geojson — light blue outlines, no fill, grey labels
+function loadAOCBoundaries() {
+    fetch('wine_regions.geojson')
+        .then(r => r.json())
+        .then(data => {
+            const aocLayer = L.geoJSON(data, {
+                style: {
+                    color: '#7BBFEA',       // light blue border
+                    weight: 1.8,
+                    opacity: 0.85,
+                    fillColor: 'transparent',
+                    fillOpacity: 0,
+                    dashArray: '4 3'
+                },
+                onEachFeature: function(feature, layer) {
+                    // Add a permanent label at the centroid of each region
+                    const name = feature.properties.name;
+                    const center = layer.getBounds().getCenter();
+
+                    const label = L.marker(center, {
+                        icon: L.divIcon({
+                            className: 'aoc-label',
+                            html: `<span>${name}</span>`,
+                            iconSize: [160, 20],
+                            iconAnchor: [80, 10]
+                        }),
+                        interactive: false,
+                        zIndexOffset: -1000
+                    }).addTo(map);
+                }
+            }).addTo(map);
+
+            // Bring markers to front after layer loads
+            map.eachLayer(l => {
+                if (l instanceof L.CircleMarker) l.bringToFront();
+            });
+        })
+        .catch(err => console.warn('AOC GeoJSON failed to load:', err));
+}
 
 // ── Markers ──────────────────────────────────────────────────────────────────
 function initializeMarkers() {
@@ -158,7 +197,6 @@ function addLegend() {
         let html = '<strong style="display:block;margin-bottom:8px;color:#00239C;font-family:Arial,Helvetica,sans-serif;font-style:normal;letter-spacing:0.05em;text-transform:uppercase;font-size:11px;">Program Phase</strong>';
 
         Object.entries(phaseColors).forEach(([phase, color]) => {
-            // Use a dark border on the yellow dot so it reads against the white legend bg
             const border = color === '#F6D500' ? '1px solid #bba800' : 'none';
             html += `
                 <div style="margin-bottom:4px;display:flex;align-items:center;gap:8px;font-style:normal;">
@@ -166,6 +204,18 @@ function addLegend() {
                     <span style="color:#1a1a2e;font-style:normal;">${phase}</span>
                 </div>`;
         });
+
+        // AOC boundary legend entry
+        html += `
+            <div style="margin-top:10px;padding-top:8px;border-top:1px solid #eee;">
+                <strong style="display:block;margin-bottom:6px;color:#00239C;font-family:Arial,Helvetica,sans-serif;font-style:normal;letter-spacing:0.05em;text-transform:uppercase;font-size:11px;">Wine Regions</strong>
+                <div style="display:flex;align-items:center;gap:8px;font-style:normal;">
+                    <svg width="28" height="12" style="flex-shrink:0;">
+                        <line x1="0" y1="6" x2="28" y2="6" stroke="#7BBFEA" stroke-width="2" stroke-dasharray="4 3"/>
+                    </svg>
+                    <span style="color:#1a1a2e;font-style:normal;">AOC Boundary (approx.)</span>
+                </div>
+            </div>`;
 
         div.innerHTML = html;
         return div;
@@ -176,6 +226,7 @@ function addLegend() {
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 window.addEventListener('load', function () {
+    loadAOCBoundaries();
     initializeMarkers();
     addLegend();
 });
