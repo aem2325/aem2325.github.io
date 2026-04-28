@@ -112,8 +112,8 @@ const franceData = {
             id: 'vaucluse',
             name: 'Vaucluse (84)',
             coordinates: { latitude: 44.00, longitude: 5.05 },
-            adminRegion: 'Provence-Alpes-Côte d\'Azur',
-            keyAppellations: 'Côtes du Rhône, Ventoux, Luberon, Châteauneuf-du-Pape vicinity',
+            adminRegion: "Provence-Alpes-Côte d'Azur",
+            keyAppellations: "Côtes du Rhône, Ventoux, Luberon, Châteauneuf-du-Pape vicinity",
             programPhase: 'Phase 2 (2024)',
             hectaresApplied: 840,
             hectaresPermanent: 269,
@@ -124,7 +124,7 @@ const franceData = {
             estimatedCompensation: 3.4,
             earliestReplantDate: '2029',
             dominantWineType: 'Red AOP',
-            notes: '3% of Phase 3 applications. Near Châteauneuf-du-Pape; quality reds under price pressure.'
+            notes: "3% of Phase 3 applications. Near Châteauneuf-du-Pape; quality reds under price pressure."
         },
         {
             id: 'tarn',
@@ -199,7 +199,7 @@ const franceData = {
             notes: 'Limited eligibility due to AOC protection. Cognac production tied to specific regulations.'
         }
     ],
-    
+
     nationalSummary: {
         totalHectaresApplied: 27457,
         totalHectaresPermanent: 10001,
