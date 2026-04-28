@@ -1,0 +1,48 @@
+.sidebar {
+    transition: transform 0.3s ease;
+}
+
+.sidebar.open {
+    transform: translateX(0);
+}
+
+.sidebar.closed {
+    transform: translateX(-250px);
+}
+
+body {
+    background-color: #ffffff;
+    color: #333;
+    font-family: Arial, sans-serif;
+}
+
+h1, h2, h3 {
+    font-weight: normal;
+}
+
+.map {
+    height: 400px;
+    width: 100%;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+}
+
+.button {
+    backgroundColor: #007BFF;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.button:hover {
+    backgroundColor: #0056b3;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
