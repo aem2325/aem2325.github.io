@@ -375,4 +375,11 @@ window.addEventListener('load', function () {
     loadAOCBoundaries();
     initializeMarkers();
     addLegend();
+    // Force Leaflet to recalculate map size after full page render
+    setTimeout(function () { map.invalidateSize(); }, 100);
+});
+
+// Also invalidate on any window resize
+window.addEventListener('resize', function () {
+    map.invalidateSize();
 });
