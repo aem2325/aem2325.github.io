@@ -16,6 +16,8 @@
         </header>
         <main class="main-content">
             <div id="map" class="map-container"></div>
+
+            <!-- Region detail sidebar -->
             <div id="sidebar" class="sidebar">
                 <div class="sidebar-header">
                     <h2 id="sidebarTitle">Select a region</h2>
@@ -27,6 +29,33 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Information sidebar -->
+            <div id="infoSidebar" class="sidebar">
+                <div class="sidebar-header">
+                    <h2 id="infoSidebarTitle">Information</h2>
+                    <button id="infoCloseBtn" class="close-btn">&times;</button>
+                </div>
+                <div id="infoSidebarContent" class="sidebar-content">
+                    <div class="data-section">
+                        <h3>About This Program</h3>
+                        <p class="notes-text">France's vineyard "uprooting" program, launched in 2023 in Bordeaux, reflects a long pattern of government intervention aimed at stabilizing the wine market in times of imbalance. The program expanded in late 2025, aiming to uproot 4% of vineyards in France. It is made possible by roughly €130 million in European Union funding, and it targets around 28,000 hectares of vineyard land for removal, primarily in regions facing overproduction and declining demand. Around 37% of the affected area is marked for permanent removal, with growers exiting wine production entirely. The remaining 63% of land involves partial removal of vines, decreasing production and further balancing the market in response to consumption and political trends.</p>
+                    </div>
+                    <div class="data-section">
+                        <h3>Historical Context</h3>
+                        <p class="notes-text">This effort builds on earlier policies shaped by the EU's Common Agricultural Policy and, more specifically, the European Common Wine Policy established in the 1970s, which sought to promote market stability, regulate supply, and maintain fair competition among member states. France has historically taken an active role in such interventions, including distillation programs that turned surplus wine into industrial alcohol, subsidies for vineyard restructuring, and incentives to improve quality over quantity. The current uprooting program continues this trend, addressing shifting consumer preferences, such as reduced domestic consumption and changing export dynamics such as tariffs, while attempting to prevent price collapses and sustain the long-term viability of the sector and its historic importance.</p>
+                    </div>
+                    <div class="data-section">
+                        <h3>Affected Regions &amp; Varieties</h3>
+                        <p class="notes-text">The vineyards most affected by the uprooting program are concentrated in southern France, particularly in regions like Bordeaux where large volumes of mid-range wine have struggled to find buyers. These areas tend to produce high-yield, commercially oriented table wines rather than premium appellations, making them especially vulnerable to shifts in demand. Among the grape varieties most impacted is Merlot, which has been widely planted and, in recent years, has contributed to oversupply in certain segments of the market.</p>
+                    </div>
+                    <div class="data-section">
+                        <h3>Grower Demographics</h3>
+                        <p class="notes-text">The profile of applicants to the program also reflects structural challenges in the industry. Many are older growers aged 55 and above who are nearing retirement and see the compensation as a dignified exit from a profession that has become increasingly uncertain. Smaller, family-run estates are particularly affected by demand decline and therefore the uprooting, as they face mounting economic pressure, changing consumption habits, and fewer successors willing to continue vineyard work.</p>
+                    </div>
+                </div>
+            </div>
+
         </main>
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
