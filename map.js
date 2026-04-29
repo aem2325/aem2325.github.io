@@ -281,6 +281,8 @@ function initializeMarkers() {
         markersByRegionId[region.id] = marker;
 
         marker.on('click', function() {
+            // Close info sidebar if open before opening region sidebar
+            document.getElementById('infoSidebar').classList.remove('active');
             displayRegionData(region);
             highlightAocForRegion(region.id);
         });
@@ -368,13 +370,44 @@ function displayRegionData(region) {
     sidebar.classList.add('active');
 }
 
+// ── Sidebar close buttons ─────────────────────────────────────────────────────
 document.getElementById('closeBtn').addEventListener('click', function() {
     document.getElementById('sidebar').classList.remove('active');
 });
 
+document.getElementById('infoCloseBtn').addEventListener('click', function() {
+    document.getElementById('infoSidebar').classList.remove('active');
+});
+
+// ── Info button Leaflet control ───────────────────────────────────────────────
+// Renders a rounded square "i" button below the zoom controls (topleft).
+// Clicking it opens the info sidebar and closes the region sidebar if open.
+function addInfoButton() {
+    var InfoControl = L.Control.extend({
+        options: { position: 'topleft' },
+        onAdd: function() {
+            var btn = L.DomUtil.create('div', 'info-btn-control');
+            btn.title = 'Information';
+            btn.innerHTML = '<span class="info-btn-letter">i</span>';
+
+            L.DomEvent.on(btn, 'click', function(e) {
+                L.DomEvent.stopPropagation(e);
+                var infoSidebar  = document.getElementById('infoSidebar');
+                var regionSidebar = document.getElementById('sidebar');
+                // Close region sidebar when info opens
+                regionSidebar.classList.remove('active');
+                // Toggle info sidebar
+                infoSidebar.classList.toggle('active');
+            });
+
+            L.DomEvent.disableClickPropagation(btn);
+            return btn;
+        }
+    });
+    new InfoControl().addTo(map);
+}
+
 // ── Combined Dropdown + Legend control (bottomleft) ───────────────────────────
-// Dropdown and legend live in one shared box so they are identical in width.
-// Dropdown sits on top, separated from legend content by a horizontal rule.
 function addLegendAndDropdown() {
     var control = L.control({ position: 'bottomleft' });
     control.onAdd = function() {
@@ -441,6 +474,8 @@ function addLegendAndDropdown() {
             if (!id) return;
             var region = franceData.regions.find(function(r) { return r.id === id; });
             if (!region) return;
+            // Close info sidebar if open
+            document.getElementById('infoSidebar').classList.remove('active');
             map.setView([region.coordinates.latitude, region.coordinates.longitude], 8, { animate: true });
             displayRegionData(region);
             highlightAocForRegion(region.id);
@@ -449,7 +484,7 @@ function addLegendAndDropdown() {
 
         div.appendChild(select);
 
-        // ── Divider between dropdown and legend ──
+        // ── Divider ──
         var divider = document.createElement('div');
         divider.style.cssText = 'border-top:1px solid #eee;margin:12px 0 10px 0;';
         div.appendChild(divider);
@@ -502,6 +537,7 @@ window.addEventListener('load', function() {
     addRivers();
     addWinds();
     initializeMarkers();
+    addInfoButton();
     addLegendAndDropdown();
     setTimeout(function() { map.invalidateSize(); }, 100);
 });
