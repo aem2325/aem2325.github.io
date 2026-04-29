@@ -2,27 +2,27 @@
 const map = L.map('map', {
     zoomControl: true
 }).setView([44.5, 1.8], 7);
- 
+
 // ── Basemap ──────────────────────────────────────────────────────────────────
 L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/">CARTO</a>',
     subdomains: 'abcd',
     maxZoom: 19
 }).addTo(map);
- 
-// ── Phase → color (Pantone palette) ─────────────────────────────────────────
+
+// ── Phase → color ────────────────────────────────────────────────────────────
 const phaseColors = {
-    'Phase 1 (2023) + Phase 2 (2024)': '#BF1722',        // Pantone True Red
-    'Phase 2 (2024)':                  '#F6D500',        // Pantone Minion Yellow TM
-    'Phase 2 (2024) — Limited Eligibility': '#3B2E8D'   // Pantone 276C
+    'Phase 1 (2023) + Phase 2 (2024)': '#4a4a4a',        // Dark grey
+    'Phase 2 (2024)':                  '#ACE1AF',        // Celadon
+    'Phase 2 (2024) — Limited Eligibility': '#00A693'   // Persian green
 };
- 
+
 // ── Grape color: red wine = Pantone True Red, white wine = Pantone Minion Yellow
 const grapeColors = {
     red:   { bg: '#BF1722', text: '#ffffff', border: '#8a1018' },
     white: { bg: '#F6D500', text: '#1a1a1a', border: '#bba800' }
 };
- 
+
 // ── Build grape pill HTML ─────────────────────────────────────────────────────
 function buildGrapePills(grapes) {
     return grapes.map(g => {
@@ -30,7 +30,7 @@ function buildGrapePills(grapes) {
         return `<span class="grape-pill" style="background:${c.bg};color:${c.text};border:1px solid ${c.border};" title="${g.notes}">${g.name}</span>`;
     }).join('');
 }
- 
+
 // ── Hover tooltip content ─────────────────────────────────────────────────────
 function buildTooltipHTML(region) {
     const grapePills = region.grapes ? buildGrapePills(region.grapes) : '';
@@ -49,23 +49,60 @@ function buildTooltipHTML(region) {
         </div>
     `;
 }
- 
+
 // ── AOC Region Boundaries ────────────────────────────────────────────────────
+// Map from GeoJSON region id → Leaflet layer, so markers can highlight them
+const aocLayersByRegionId = {};
+let activeAocLayer = null;
+
+const AOC_DEFAULT_STYLE = {
+    color: '#7BBFEA',
+    weight: 1.8,
+    opacity: 0.85,
+    fillColor: 'transparent',
+    fillOpacity: 0,
+    dashArray: '4 3'
+};
+
+const AOC_SELECTED_STYLE = {
+    color: '#7BBFEA',
+    weight: 2.2,
+    opacity: 1,
+    fillColor: '#7BBFEA',
+    fillOpacity: 0.15,
+    dashArray: '4 3'
+};
+
+// Map from department region id → matching GeoJSON ids
+// (some departments share a single AOC boundary polygon)
+const regionToAocId = {
+    'gironde':        ['bordeaux'],
+    'charente':       ['cognac'],
+    'aude':           ['languedoc', 'corbieres'],
+    'herault':        ['languedoc'],
+    'gard':           ['languedoc'],
+    'pyr-orientales': ['roussillon'],
+    'vaucluse':       ['rhone-vaucluse'],
+    'drome':          ['crozeshermitage'],
+    'tarn':           ['gaillac'],
+    'gers':           ['armagnac'],
+    'lot-et-garonne': ['buzet']
+};
+
 function loadAOCBoundaries() {
     fetch('wine_regions.geojson')
         .then(r => r.json())
         .then(data => {
             L.geoJSON(data, {
-                style: {
-                    color: '#7BBFEA',
-                    weight: 1.8,
-                    opacity: 0.85,
-                    fillColor: 'transparent',
-                    fillOpacity: 0,
-                    dashArray: '4 3'
-                },
+                style: AOC_DEFAULT_STYLE,
                 onEachFeature: function(feature, layer) {
+                    const id   = feature.properties.id;
                     const name = feature.properties.name;
+
+                    // Store layer reference by its GeoJSON id
+                    aocLayersByRegionId[id] = layer;
+
+                    // AOC name label at centroid
                     const center = layer.getBounds().getCenter();
                     L.marker(center, {
                         icon: L.divIcon({
@@ -79,19 +116,31 @@ function loadAOCBoundaries() {
                     }).addTo(map);
                 }
             }).addTo(map);
- 
+
             map.eachLayer(l => {
                 if (l instanceof L.CircleMarker) l.bringToFront();
             });
         })
         .catch(err => console.warn('AOC GeoJSON failed to load:', err));
 }
- 
+
+// Highlight the AOC polygons that correspond to a clicked department region
+function highlightAocForRegion(regionId) {
+    // Reset previously highlighted layers
+    if (activeAocLayer) {
+        activeAocLayer.forEach(l => l.setStyle(AOC_DEFAULT_STYLE));
+    }
+    const aocIds = regionToAocId[regionId] || [];
+    const layers = aocIds.map(id => aocLayersByRegionId[id]).filter(Boolean);
+    layers.forEach(l => l.setStyle(AOC_SELECTED_STYLE));
+    activeAocLayer = layers;
+}
+
 // ── Markers ──────────────────────────────────────────────────────────────────
 function initializeMarkers() {
     franceData.regions.forEach(region => {
         const color = phaseColors[region.programPhase] || '#555555';
- 
+
         const marker = L.circleMarker(
             [region.coordinates.latitude, region.coordinates.longitude],
             {
@@ -103,12 +152,13 @@ function initializeMarkers() {
                 fillOpacity: 0.9
             }
         ).addTo(map);
- 
-        // Click → open sidebar
+
+        // Click → open sidebar + highlight AOC boundary
         marker.on('click', function () {
             displayRegionData(region);
+            highlightAocForRegion(region.id);
         });
- 
+
         // Hover → show tooltip
         marker.bindTooltip(buildTooltipHTML(region), {
             direction: 'top',
@@ -117,7 +167,7 @@ function initializeMarkers() {
             className: 'hover-tooltip-wrapper',
             offset: [0, -18]
         });
- 
+
         // Permanent region name label
         L.tooltip({
             permanent: true,
@@ -130,20 +180,20 @@ function initializeMarkers() {
         .addTo(map);
     });
 }
- 
+
 // ── Sidebar ───────────────────────────────────────────────────────────────────
 function displayRegionData(region) {
     const sidebar        = document.getElementById('sidebar');
     const sidebarTitle   = document.getElementById('sidebarTitle');
     const sidebarContent = document.getElementById('sidebarContent');
- 
+
     sidebarTitle.textContent = region.name;
- 
+
     // Build grape pills for sidebar
     const grapePillsHTML = region.grapes
         ? `<div class="grape-pills-container">${buildGrapePills(region.grapes)}</div>`
         : '';
- 
+
     // Build individual grape detail rows
     const grapeDetailsHTML = region.grapes ? region.grapes.map(g => {
         const c = grapeColors[g.type];
@@ -153,7 +203,7 @@ function displayRegionData(region) {
                 <span class="grape-detail-note">${g.notes}</span>
             </div>`;
     }).join('') : '';
- 
+
     const html = `
         <div class="data-section">
             <h3>Program Info</h3>
@@ -174,7 +224,7 @@ function displayRegionData(region) {
                 <div class="data-value">${region.dominantWineType}</div>
             </div>
         </div>
- 
+
         <div class="data-section">
             <h3>Vineyard Data</h3>
             <div class="data-item">
@@ -202,7 +252,7 @@ function displayRegionData(region) {
                 <div class="data-value">${region.keyAppellations}</div>
             </div>
         </div>
- 
+
         <div class="data-section">
             <h3>Compensation</h3>
             <div class="data-item">
@@ -214,12 +264,12 @@ function displayRegionData(region) {
                 <div class="data-value">€${region.estimatedCompensation}M</div>
             </div>
         </div>
- 
+
         <div class="data-section">
             <h3>Climate &amp; Terroir</h3>
             <p class="notes-text">${region.climate || 'No data available.'}</p>
         </div>
- 
+
         <div class="data-section">
             <h3>Key Grape Varieties</h3>
             ${grapePillsHTML}
@@ -233,31 +283,31 @@ function displayRegionData(region) {
                 <span class="grape-legend-text">White wine grape</span>
             </div>
         </div>
- 
+
         <div class="data-section">
             <h3>Winemaking &amp; Style</h3>
             <p class="notes-text">${region.winemaking || 'No data available.'}</p>
         </div>
- 
+
         <div class="data-section">
             <h3>Notes</h3>
             <p class="notes-text">${region.notes}</p>
         </div>
     `;
- 
+
     sidebarContent.innerHTML = html;
     sidebar.classList.add('active');
 }
- 
+
 // Close sidebar
 document.getElementById('closeBtn').addEventListener('click', function () {
     document.getElementById('sidebar').classList.remove('active');
 });
- 
+
 // ── Legend ────────────────────────────────────────────────────────────────────
 function addLegend() {
     const legend = L.control({ position: 'bottomleft' });
- 
+
     legend.onAdd = function () {
         const div = L.DomUtil.create('div', 'info legend');
         div.style.cssText = [
@@ -271,18 +321,18 @@ function addLegend() {
             'font-style:normal',
             'border-top:3px solid #BF1722'
         ].join(';');
- 
+
         let html = '<strong style="display:block;margin-bottom:8px;color:#00239C;font-family:Arial,Helvetica,sans-serif;font-style:normal;letter-spacing:0.05em;text-transform:uppercase;font-size:11px;">Program Phase</strong>';
- 
+
         Object.entries(phaseColors).forEach(([phase, color]) => {
-            const border = color === '#F6D500' ? '1px solid #bba800' : 'none';
+            const border = color === '#ACE1AF' ? '1px solid #7db880' : 'none';
             html += `
                 <div style="margin-bottom:4px;display:flex;align-items:center;gap:8px;font-style:normal;">
                     <span style="background:${color};width:12px;height:12px;border-radius:50%;display:inline-block;flex-shrink:0;border:${border};box-sizing:border-box;"></span>
                     <span style="color:#1a1a2e;font-style:normal;">${phase}</span>
                 </div>`;
         });
- 
+
         html += `
             <div style="margin-top:10px;padding-top:8px;border-top:1px solid #eee;">
                 <strong style="display:block;margin-bottom:6px;color:#00239C;font-family:Arial,Helvetica,sans-serif;font-style:normal;letter-spacing:0.05em;text-transform:uppercase;font-size:11px;">Wine Regions</strong>
@@ -293,18 +343,17 @@ function addLegend() {
                     <span style="color:#1a1a2e;font-style:normal;">AOC Boundary (approx.)</span>
                 </div>
             </div>`;
- 
+
         div.innerHTML = html;
         return div;
     };
- 
+
     legend.addTo(map);
 }
- 
+
 // ── Init ──────────────────────────────────────────────────────────────────────
 window.addEventListener('load', function () {
     loadAOCBoundaries();
     initializeMarkers();
     addLegend();
 });
- 
