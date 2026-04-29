@@ -121,7 +121,6 @@ function addWinds() {
         var mid = wind.coords[Math.floor(wind.coords.length / 2)];
         L.marker(mid, {
             icon: L.divIcon({
-                // CHANGED: added style="color:#b09fcc;" to match wind line color
                 html: '<span class="wind-label" style="color:#b09fcc;">' + wind.name + '</span>',
                 className: 'wind-label-icon',
                 iconAnchor: [-6, 8]
@@ -195,7 +194,6 @@ function addRivers() {
         var mid = river.coords[Math.floor(river.coords.length / 2)];
         L.marker(mid, {
             icon: L.divIcon({
-                // CHANGED: added style="color:#4a90d9;" to match river line color
                 html: '<span class="river-label" style="color:#4a90d9;">' + river.name + '</span>',
                 className: 'river-label-icon',
                 iconAnchor: [-6, 8]
@@ -268,87 +266,9 @@ function highlightAocForRegion(regionId) {
     activeAocLayers.forEach(function(l) { l.setStyle(AOC_SELECTED_STYLE); });
 }
 
-// ── Dropdown (as Leaflet map control) ─────────────────────────────────────────
-// CHANGED: moved from HTML header into a Leaflet control styled like the legend
+// ── Markers ───────────────────────────────────────────────────────────────────
 var markersByRegionId = {};
 
-function populateDropdown() {
-    var dropdownControl = L.control({ position: 'topleft' });
-    dropdownControl.onAdd = function() {
-        var div = L.DomUtil.create('div', 'info dropdown-control');
-        div.style.cssText = [
-            'background:#ffffff',
-            'padding:12px 16px',
-            'border-radius:4px',
-            'box-shadow:0 2px 8px rgba(0,35,156,0.15)',
-            'font-size:12px',
-            'font-family:Milker,Arial,Helvetica,sans-serif',
-            'font-style:normal',
-            'border-top:3px solid #BF1722',
-            'min-width:180px'
-        ].join(';');
-
-        var label = document.createElement('div');
-        label.style.cssText = [
-            'color:#00239C',
-            'font-family:Milker,Arial,Helvetica,sans-serif',
-            'letter-spacing:0.05em',
-            'text-transform:uppercase',
-            'font-size:11px',
-            'margin-bottom:8px',
-            'font-weight:normal'
-        ].join(';');
-        label.textContent = 'Jump to Region';
-        div.appendChild(label);
-
-        var select = document.createElement('select');
-        select.id = 'regionSelect';
-        select.style.cssText = [
-            'width:100%',
-            'font-family:Milker,Arial,Helvetica,sans-serif',
-            'font-size:12px',
-            'color:#1a1a2e',
-            'border:1px solid #dde2f0',
-            'border-radius:3px',
-            'padding:5px 8px',
-            'background:#f4f6fb',
-            'cursor:pointer',
-            'outline:none'
-        ].join(';');
-
-        var placeholder = document.createElement('option');
-        placeholder.value = '';
-        placeholder.textContent = '— Select a region —';
-        select.appendChild(placeholder);
-
-        franceData.regions.forEach(function(region) {
-            var opt = document.createElement('option');
-            opt.value = region.id;
-            opt.textContent = region.name;
-            select.appendChild(opt);
-        });
-
-        select.addEventListener('change', function() {
-            var id = this.value;
-            if (!id) return;
-            var region = franceData.regions.find(function(r) { return r.id === id; });
-            if (!region) return;
-            map.setView([region.coordinates.latitude, region.coordinates.longitude], 8, { animate: true });
-            displayRegionData(region);
-            highlightAocForRegion(region.id);
-            select.value = '';
-        });
-
-        L.DomEvent.disableClickPropagation(div);
-        L.DomEvent.disableScrollPropagation(div);
-
-        div.appendChild(select);
-        return div;
-    };
-    dropdownControl.addTo(map);
-}
-
-// ── Markers ───────────────────────────────────────────────────────────────────
 function initializeMarkers() {
     franceData.regions.forEach(function(region) {
         var color = phaseColors[region.programPhase] || '#555555';
@@ -397,7 +317,6 @@ function displayRegionData(region) {
         '</div>';
     }).join('') : '';
 
-    // CHANGED: "Exit Notes & Statistics" moved to after Compensation; renamed from "Notes"
     var html =
         '<div class="data-section">' +
             '<h3>Program Info</h3>' +
@@ -453,32 +372,105 @@ document.getElementById('closeBtn').addEventListener('click', function() {
     document.getElementById('sidebar').classList.remove('active');
 });
 
-// ── Legend ────────────────────────────────────────────────────────────────────
-function addLegend() {
-    var legend = L.control({ position: 'bottomleft' });
-    legend.onAdd = function() {
+// ── Combined Dropdown + Legend control (bottomleft) ───────────────────────────
+// Dropdown and legend live in one shared box so they are identical in width.
+// Dropdown sits on top, separated from legend content by a horizontal rule.
+function addLegendAndDropdown() {
+    var control = L.control({ position: 'bottomleft' });
+    control.onAdd = function() {
         var div = L.DomUtil.create('div', 'info legend');
         div.style.cssText = [
-            'background:#ffffff', 'padding:12px 16px', 'border-radius:4px',
-            'box-shadow:0 2px 8px rgba(0,35,156,0.15)', 'font-size:12px',
-            'line-height:1.9', 'font-family:Arial,Helvetica,sans-serif',
-            'font-style:normal', 'border-top:3px solid #BF1722'
+            'background:#ffffff',
+            'padding:12px 16px',
+            'border-radius:4px',
+            'box-shadow:0 2px 8px rgba(0,35,156,0.15)',
+            'font-size:12px',
+            'line-height:1.9',
+            'font-family:Arial,Helvetica,sans-serif',
+            'font-style:normal',
+            'border-top:3px solid #BF1722',
+            'min-width:220px'
         ].join(';');
 
-        var html = '<strong style="display:block;margin-bottom:8px;color:#00239C;font-family:Milker,Arial,Helvetica,sans-serif;letter-spacing:0.05em;text-transform:uppercase;font-size:11px;">Program Phase</strong>';
+        // ── Jump to Region label ──
+        var dropLabel = document.createElement('div');
+        dropLabel.style.cssText = [
+            'color:#00239C',
+            'font-family:Milker,Arial,Helvetica,sans-serif',
+            'letter-spacing:0.05em',
+            'text-transform:uppercase',
+            'font-size:11px',
+            'margin-bottom:8px',
+            'font-weight:normal',
+            'line-height:1.4'
+        ].join(';');
+        dropLabel.textContent = 'Jump to Region';
+        div.appendChild(dropLabel);
+
+        // ── Select element ──
+        var select = document.createElement('select');
+        select.id = 'regionSelect';
+        select.style.cssText = [
+            'width:100%',
+            'font-family:Milker,Arial,Helvetica,sans-serif',
+            'font-size:12px',
+            'color:#1a1a2e',
+            'border:1px solid #dde2f0',
+            'border-radius:3px',
+            'padding:5px 8px',
+            'background:#f4f6fb',
+            'cursor:pointer',
+            'outline:none',
+            'box-sizing:border-box'
+        ].join(';');
+
+        var placeholder = document.createElement('option');
+        placeholder.value = '';
+        placeholder.textContent = '— Select a region —';
+        select.appendChild(placeholder);
+
+        franceData.regions.forEach(function(region) {
+            var opt = document.createElement('option');
+            opt.value = region.id;
+            opt.textContent = region.name;
+            select.appendChild(opt);
+        });
+
+        select.addEventListener('change', function() {
+            var id = this.value;
+            if (!id) return;
+            var region = franceData.regions.find(function(r) { return r.id === id; });
+            if (!region) return;
+            map.setView([region.coordinates.latitude, region.coordinates.longitude], 8, { animate: true });
+            displayRegionData(region);
+            highlightAocForRegion(region.id);
+            select.value = '';
+        });
+
+        div.appendChild(select);
+
+        // ── Divider between dropdown and legend ──
+        var divider = document.createElement('div');
+        divider.style.cssText = 'border-top:1px solid #eee;margin:12px 0 10px 0;';
+        div.appendChild(divider);
+
+        // ── Legend content ──
+        var legendDiv = document.createElement('div');
+        var legendHTML =
+            '<strong style="display:block;margin-bottom:8px;color:#00239C;font-family:Milker,Arial,Helvetica,sans-serif;letter-spacing:0.05em;text-transform:uppercase;font-size:11px;line-height:1.4;">Program Phase</strong>';
 
         Object.entries(phaseColors).forEach(function(entry) {
             var phase = entry[0], color = entry[1];
             var border = color === '#ACE1AF' ? '1px solid #7db880' : 'none';
-            html += '<div style="margin-bottom:4px;display:flex;align-items:center;gap:8px;">' +
+            legendHTML += '<div style="margin-bottom:4px;display:flex;align-items:center;gap:8px;">' +
                 '<span style="background:' + color + ';width:12px;height:12px;border-radius:50%;display:inline-block;flex-shrink:0;border:' + border + ';box-sizing:border-box;"></span>' +
                 '<span style="color:#1a1a2e;">' + phase + '</span>' +
             '</div>';
         });
 
-        html +=
+        legendHTML +=
             '<div style="margin-top:10px;padding-top:8px;border-top:1px solid #eee;">' +
-                '<strong style="display:block;margin-bottom:6px;color:#00239C;font-family:Milker,Arial,Helvetica,sans-serif;letter-spacing:0.05em;text-transform:uppercase;font-size:11px;">Wine Regions</strong>' +
+                '<strong style="display:block;margin-bottom:6px;color:#00239C;font-family:Milker,Arial,Helvetica,sans-serif;letter-spacing:0.05em;text-transform:uppercase;font-size:11px;line-height:1.4;">Wine Regions</strong>' +
                 '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">' +
                     '<svg width="28" height="12" style="flex-shrink:0;"><line x1="0" y1="6" x2="28" y2="6" stroke="#7BBFEA" stroke-width="2" stroke-dasharray="4 3"/></svg>' +
                     '<span style="color:#1a1a2e;">AOC Boundary (approx.)</span>' +
@@ -493,10 +485,15 @@ function addLegend() {
                 '</div>' +
             '</div>';
 
-        div.innerHTML = html;
+        legendDiv.innerHTML = legendHTML;
+        div.appendChild(legendDiv);
+
+        L.DomEvent.disableClickPropagation(div);
+        L.DomEvent.disableScrollPropagation(div);
+
         return div;
     };
-    legend.addTo(map);
+    control.addTo(map);
 }
 
 // ── Init ──────────────────────────────────────────────────────────────────────
@@ -505,8 +502,7 @@ window.addEventListener('load', function() {
     addRivers();
     addWinds();
     initializeMarkers();
-    addLegend();
-    populateDropdown();
+    addLegendAndDropdown();
     setTimeout(function() { map.invalidateSize(); }, 100);
 });
 
