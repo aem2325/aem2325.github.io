@@ -2,6 +2,7 @@ const franceData = {
     regions: [
         {
             id: 'gironde',
+            phase3Pct: 28,
             name: 'Gironde (33)',
             coordinates: { latitude: 44.84, longitude: -0.58 },
             adminRegion: 'Nouvelle-Aquitaine',
@@ -31,6 +32,7 @@ const franceData = {
         },
         {
             id: 'aude',
+            phase3Pct: 16,
             name: 'Aude (11)',
             coordinates: { latitude: 43.21, longitude: 2.35 },
             adminRegion: 'Occitanie',
@@ -59,6 +61,7 @@ const franceData = {
         },
         {
             id: 'gard',
+            phase3Pct: 12,
             name: 'Gard (30)',
             coordinates: { latitude: 43.84, longitude: 4.36 },
             adminRegion: 'Occitanie',
@@ -88,6 +91,7 @@ const franceData = {
         },
         {
             id: 'herault',
+            phase3Pct: 10,
             name: 'Hérault (34)',
             coordinates: { latitude: 43.61, longitude: 3.88 },
             adminRegion: 'Occitanie',
@@ -116,6 +120,7 @@ const franceData = {
         },
         {
             id: 'pyr-orientales',
+            phase3Pct: 7,
             name: 'Pyrénées-Orientales (66)',
             coordinates: { latitude: 42.70, longitude: 2.89 },
             adminRegion: 'Occitanie',
@@ -145,6 +150,7 @@ const franceData = {
         },
         {
             id: 'gers',
+            phase3Pct: 4,
             name: 'Gers (32)',
             coordinates: { latitude: 43.65, longitude: 0.59 },
             adminRegion: 'Occitanie / Sud-Ouest',
@@ -171,6 +177,7 @@ const franceData = {
         },
         {
             id: 'vaucluse',
+            phase3Pct: 3,
             name: 'Vaucluse (84)',
             coordinates: { latitude: 44.00, longitude: 5.05 },
             adminRegion: "Provence-Alpes-Côte d'Azur",
@@ -200,6 +207,7 @@ const franceData = {
         },
         {
             id: 'tarn',
+            phase3Pct: 2,
             name: 'Tarn (81)',
             coordinates: { latitude: 43.93, longitude: 2.14 },
             adminRegion: 'Occitanie',
@@ -228,6 +236,7 @@ const franceData = {
         },
         {
             id: 'drome',
+            phase3Pct: 2,
             name: 'Drôme (26)',
             coordinates: { latitude: 44.73, longitude: 4.90 },
             adminRegion: 'Auvergne-Rhône-Alpes',
@@ -254,6 +263,7 @@ const franceData = {
         },
         {
             id: 'lot-et-garonne',
+            phase3Pct: 2,
             name: 'Lot-et-Garonne (47)',
             coordinates: { latitude: 44.35, longitude: 0.62 },
             adminRegion: 'Nouvelle-Aquitaine',
@@ -281,6 +291,7 @@ const franceData = {
         },
         {
             id: 'charente',
+            phase3Pct: 4,
             name: 'Charente / Charente-Maritime (16/17)',
             coordinates: { latitude: 45.70, longitude: -0.50 },
             adminRegion: 'Nouvelle-Aquitaine',
@@ -305,7 +316,7 @@ const franceData = {
             winemaking: 'Wines are low alcohol, high acidity — purpose-built for distillation into Cognac. Minimal winemaking intervention; stainless steel fermentation. Double distillation in copper pot stills. Rare table wines are light, tart, and neutral.'
         }
     ],
- 
+
     nationalSummary: {
         totalHectaresApplied: 27457,
         totalHectaresPermanent: 10001,
