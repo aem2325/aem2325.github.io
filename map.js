@@ -298,8 +298,21 @@ function displayRegionData(region) {
         <div class="data-section">
             <h3>Notes</h3>
             <p class="notes-text">${region.notes}</p>
+            ${region.phase3Pct != null ? `
+            <div class="phase3-bar-wrap">
+                <div class="phase3-bar-label">
+                    <span class="phase3-bar-title">Share of Phase 3 Applications</span>
+                    <span class="phase3-bar-pct">${region.phase3Pct}%</span>
+                </div>
+                <div class="phase3-bar-track">
+                    <div class="phase3-bar-fill" style="width:${region.phase3Pct}%"></div>
+                </div>
+                <div class="phase3-bar-axis">
+                    <span>0%</span><span>25%</span><span>50%</span><span>75%</span><span>100%</span>
+                </div>
+            </div>` : ''}
         </div>
-    `;
+    \`;
 
     sidebarContent.innerHTML = html;
     sidebar.classList.add('active');
