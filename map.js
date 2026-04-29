@@ -4,11 +4,17 @@ const map = L.map('map', {
 }).setView([44.5, 1.8], 7);
 
 // ── Basemap ──────────────────────────────────────────────────────────────────
+// CartoDB Positron — land is white/light grey, ocean tiles are transparent
+// so the dark navy body background (#0a1628) shows through as the ocean.
 L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/">CARTO</a>',
     subdomains: 'abcd',
-    maxZoom: 19
+    maxZoom: 19,
+    opacity: 1
 }).addTo(map);
+
+// Paint the Leaflet map background (ocean/water areas) deep dark navy
+map.getContainer().style.background = '#0a1628';
 
 // ── Phase → color ────────────────────────────────────────────────────────────
 const phaseColors = {
