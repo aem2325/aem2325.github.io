@@ -3,7 +3,7 @@ const franceData = {
         {
             id: 'gironde',
             phase3Pct: 28,
-            name: 'Gironde (33)',
+            name: 'Gironde',
             coordinates: { latitude: 44.84, longitude: -0.58 },
             adminRegion: 'Nouvelle-Aquitaine',
             keyAppellations: 'Bordeaux, Bordeaux Supérieur, Médoc, Saint-Émilion, Côtes de Bourg',
@@ -33,7 +33,7 @@ const franceData = {
         {
             id: 'aude',
             phase3Pct: 16,
-            name: 'Aude (11)',
+            name: 'Aude',
             coordinates: { latitude: 43.21, longitude: 2.35 },
             adminRegion: 'Occitanie',
             keyAppellations: 'Minervois, Corbières, Fitou, Vin de France IGP',
@@ -62,7 +62,7 @@ const franceData = {
         {
             id: 'gard',
             phase3Pct: 12,
-            name: 'Gard (30)',
+            name: 'Gard',
             coordinates: { latitude: 43.84, longitude: 4.36 },
             adminRegion: 'Occitanie',
             keyAppellations: 'Costières de Nîmes, Côtes du Rhône, Clairette de Bellegarde',
@@ -92,7 +92,7 @@ const franceData = {
         {
             id: 'herault',
             phase3Pct: 10,
-            name: 'Hérault (34)',
+            name: 'Hérault',
             coordinates: { latitude: 43.61, longitude: 3.88 },
             adminRegion: 'Occitanie',
             keyAppellations: 'Languedoc AOP, Picpoul de Pinet, Saint-Chinian, Faugères',
@@ -121,7 +121,7 @@ const franceData = {
         {
             id: 'pyr-orientales',
             phase3Pct: 7,
-            name: 'Pyrénées-Orientales (66)',
+            name: 'Pyrénées-Orientales',
             coordinates: { latitude: 42.70, longitude: 2.89 },
             adminRegion: 'Occitanie',
             keyAppellations: 'Côtes du Roussillon, Muscat de Rivesaltes, Banyuls',
@@ -151,7 +151,7 @@ const franceData = {
         {
             id: 'gers',
             phase3Pct: 4,
-            name: 'Gers (32)',
+            name: 'Gers',
             coordinates: { latitude: 43.65, longitude: 0.59 },
             adminRegion: 'Occitanie / Sud-Ouest',
             keyAppellations: 'Armagnac, Côtes de Gascogne IGP, Madiran',
@@ -178,7 +178,7 @@ const franceData = {
         {
             id: 'vaucluse',
             phase3Pct: 3,
-            name: 'Vaucluse (84)',
+            name: 'Vaucluse',
             coordinates: { latitude: 44.00, longitude: 5.05 },
             adminRegion: "Provence-Alpes-Côte d'Azur",
             keyAppellations: "Côtes du Rhône, Ventoux, Luberon, Châteauneuf-du-Pape vicinity",
@@ -208,7 +208,7 @@ const franceData = {
         {
             id: 'tarn',
             phase3Pct: 2,
-            name: 'Tarn (81)',
+            name: 'Tarn',
             coordinates: { latitude: 43.93, longitude: 2.14 },
             adminRegion: 'Occitanie',
             keyAppellations: 'Gaillac, Côtes du Tarn IGP',
@@ -237,7 +237,7 @@ const franceData = {
         {
             id: 'drome',
             phase3Pct: 2,
-            name: 'Drôme (26)',
+            name: 'Drôme',
             coordinates: { latitude: 44.73, longitude: 4.90 },
             adminRegion: 'Auvergne-Rhône-Alpes',
             keyAppellations: 'Côtes du Rhône, Crozes-Hermitage, Clairette de Die',
@@ -264,7 +264,7 @@ const franceData = {
         {
             id: 'lot-et-garonne',
             phase3Pct: 2,
-            name: 'Lot-et-Garonne (47)',
+            name: 'Lot-et-Garonne',
             coordinates: { latitude: 44.35, longitude: 0.62 },
             adminRegion: 'Nouvelle-Aquitaine',
             keyAppellations: 'Buzet, Côtes du Marmandais, Duras',
@@ -292,7 +292,7 @@ const franceData = {
         {
             id: 'charente',
             phase3Pct: 4,
-            name: 'Charente / Charente-Maritime (16/17)',
+            name: 'Charente / Charente-Maritime',
             coordinates: { latitude: 45.70, longitude: -0.50 },
             adminRegion: 'Nouvelle-Aquitaine',
             keyAppellations: 'Cognac AOC (Ugni Blanc), Pineau des Charentes',
