@@ -1,38 +1,37 @@
 // Initialize map centered on France
-const map = L.map('map', { zoomControl: true }).setView([44.5, 1.8], 7);
-
-// Paint the Leaflet map background (ocean/water areas) deep dark navy
+var map = L.map('map', { zoomControl: true }).setView([44.5, 1.8], 7);
+ 
+// Paint the Leaflet map background (ocean) deep dark navy
 map.getContainer().style.background = '#0a1628';
-
+ 
 // ── Basemap ───────────────────────────────────────────────────────────────────
 L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/">CARTO</a>',
     subdomains: 'abcd',
     maxZoom: 19
 }).addTo(map);
-
+ 
 // ── Phase colors ──────────────────────────────────────────────────────────────
-const phaseColors = {
-    'Phase 1 (2023) + Phase 2 (2024)':      '#4a4a4a',  // Dark grey
-    'Phase 2 (2024)':                        '#ACE1AF',  // Celadon
-    'Phase 2 (2024) — Limited Eligibility': '#00A693'   // Persian green
+var phaseColors = {
+    'Phase 1 (2023) + Phase 2 (2024)':      '#4a4a4a',
+    'Phase 2 (2024)':                        '#ACE1AF',
+    'Phase 2 (2024) — Limited Eligibility': '#00A693'
 };
-
+ 
 // ── Grape pill colors ─────────────────────────────────────────────────────────
-const grapeColors = {
+var grapeColors = {
     red:   { bg: '#BF1722', text: '#ffffff', border: '#8a1018' },
     white: { bg: '#F6D500', text: '#1a1a1a', border: '#bba800' }
 };
-
-// ── Grape pill HTML builder ───────────────────────────────────────────────────
+ 
+// ── Helpers ───────────────────────────────────────────────────────────────────
 function buildGrapePills(grapes) {
     return grapes.map(function(g) {
         var c = grapeColors[g.type];
         return '<span class="grape-pill" style="background:' + c.bg + ';color:' + c.text + ';border:1px solid ' + c.border + ';" title="' + g.notes + '">' + g.name + '</span>';
     }).join('');
 }
-
-// ── Hover tooltip HTML ────────────────────────────────────────────────────────
+ 
 function buildTooltipHTML(region) {
     var pills = region.grapes ? buildGrapePills(region.grapes) : '';
     var grapesBlock = pills ? '<div class="ht-grapes">' + pills + '</div>' : '';
@@ -40,11 +39,9 @@ function buildTooltipHTML(region) {
         '<div class="ht-title">' + region.name + '</div>' +
         '<div class="ht-row"><span class="ht-label">Permanent removal</span><span class="ht-value">' + region.hectaresPermanent.toLocaleString() + ' ha</span></div>' +
         '<div class="ht-row"><span class="ht-label">Partial removal</span><span class="ht-value">' + region.hectaresPartial.toLocaleString() + ' ha</span></div>' +
-        grapesBlock +
-        '</div>';
+        grapesBlock + '</div>';
 }
-
-// ── Phase 3 bar HTML ──────────────────────────────────────────────────────────
+ 
 function buildPhase3Bar(pct) {
     if (pct == null) return '';
     return '<div class="phase3-bar-wrap">' +
@@ -52,19 +49,177 @@ function buildPhase3Bar(pct) {
             '<span class="phase3-bar-title">Share of Phase 3 Applications</span>' +
             '<span class="phase3-bar-pct">' + pct + '%</span>' +
         '</div>' +
-        '<div class="phase3-bar-track">' +
-            '<div class="phase3-bar-fill" style="width:' + pct + '%"></div>' +
-        '</div>' +
-        '<div class="phase3-bar-axis">' +
-            '<span>0%</span><span>25%</span><span>50%</span><span>75%</span><span>100%</span>' +
-        '</div>' +
+        '<div class="phase3-bar-track"><div class="phase3-bar-fill" style="width:' + pct + '%"></div></div>' +
+        '<div class="phase3-bar-axis"><span>0%</span><span>25%</span><span>50%</span><span>75%</span><span>100%</span></div>' +
     '</div>';
 }
-
-// ── AOC boundary layers ───────────────────────────────────────────────────────
+ 
+// ── Winds ─────────────────────────────────────────────────────────────────────
+// Coordinates: [lat, lng]
+// Mistral: Lyon area → off coast near Martigues
+// Tramontane: Castres area → off coast near Saint-Laurent-de-la-Salanque
+var winds = [
+    {
+        name: 'Mistral',
+        popup: 'Mistral: cold dry North wind down Rhône Valley; prevents mildew; moderates Mediterranean heat',
+        // Path flows south down the Rhône valley
+        coords: [
+            [45.75, 4.83],  // Lyon
+            [45.05, 4.78],  // Valence area
+            [44.20, 4.70],  // Montélimar area
+            [43.90, 4.63],  // Pont-Saint-Esprit area
+            [43.55, 4.90],  // Arles area
+            [43.40, 5.05]   // off coast near Martigues
+        ]
+    },
+    {
+        name: 'Tramontane',
+        popup: 'Tramontane: cold N/NW wind in Languedoc-Roussillon; similar drying effect to Mistral',
+        // Path flows south/southeast from Castres toward the coast
+        coords: [
+            [43.60, 2.24],  // Castres
+            [43.35, 2.65],  // Béziers area
+            [43.10, 2.98],  // Narbonne area
+            [42.82, 3.01]   // off coast near Saint-Laurent-de-la-Salanque
+        ]
+    }
+];
+ 
+// Create an SVG arrow marker for wind direction (points south along the line)
+function createArrowIcon(color) {
+    var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="20" viewBox="0 0 14 20">' +
+        '<polygon points="7,18 1,6 7,10 13,6" fill="' + color + '" stroke="' + color + '" stroke-width="1"/>' +
+        '<line x1="7" y1="2" x2="7" y2="11" stroke="' + color + '" stroke-width="2"/>' +
+    '</svg>';
+    return L.divIcon({
+        html: svg,
+        className: 'wind-arrow-icon',
+        iconSize: [14, 20],
+        iconAnchor: [7, 10]
+    });
+}
+ 
+function addWinds() {
+    var windColor = '#b09fcc';   // lavender
+    var windTextColor = '#7c5cbf'; // purple
+ 
+    winds.forEach(function(wind) {
+        // Dashed lavender polyline
+        var line = L.polyline(wind.coords, {
+            color: windColor,
+            weight: 2,
+            opacity: 0.9,
+            dashArray: '8 5'
+        }).addTo(map);
+ 
+        // Popup on hover
+        var popupContent = '<div class="feature-popup">' + wind.popup + '</div>';
+        line.bindTooltip(popupContent, {
+            sticky: true,
+            opacity: 1,
+            className: 'feature-tooltip'
+        });
+ 
+        // Arrow marker at the southern (last) coordinate
+        var lastCoord = wind.coords[wind.coords.length - 1];
+        L.marker(lastCoord, {
+            icon: createArrowIcon(windColor),
+            interactive: false,
+            zIndexOffset: 500
+        }).addTo(map);
+ 
+        // Wind name label near the midpoint
+        var mid = wind.coords[Math.floor(wind.coords.length / 2)];
+        L.marker(mid, {
+            icon: L.divIcon({
+                html: '<span class="wind-label">' + wind.name + '</span>',
+                className: 'wind-label-icon',
+                iconAnchor: [-6, 8]
+            }),
+            interactive: false,
+            zIndexOffset: 400
+        }).addTo(map);
+    });
+}
+ 
+// ── Rivers ────────────────────────────────────────────────────────────────────
+var rivers = [
+    {
+        name: 'Rhône',
+        popup: 'Rhône: defines Northern and Southern Rhône wine regions; reflects sunlight on steep slopes',
+        coords: [
+            [44.92, 4.88],  // Menne / Die area (upper)
+            [44.73, 4.85],  // Crest
+            [44.55, 4.82],  // Loriol-sur-Drôme
+            [44.33, 4.75],  // Montélimar
+            [44.10, 4.68],  // Pont-Saint-Esprit
+            [43.90, 4.62],  // Roquemaure
+            [43.67, 4.63],  // Arles north
+            [43.55, 4.62],  // Arles
+            [43.50, 4.52]   // Tarascon
+        ]
+    },
+    {
+        name: 'Gironde / Garonne',
+        popup: 'Gironde: estuary and river system moderating Bordeaux climate',
+        coords: [
+            [45.57, -1.07], // Gironde estuary mouth (coast)
+            [45.25, -0.72], // Gironde estuary mid
+            [44.97, -0.53], // Bordeaux
+            [44.80, -0.38], // south of Bordeaux
+            [44.60, -0.22], // Cadillac area
+            [44.42,  0.10], // Langon
+            [44.28,  0.27]  // Gironde-sur-Dropt area
+        ]
+    },
+    {
+        name: 'Ciron',
+        popup: 'Ciron River: creates morning mist for Sauternes noble rot',
+        coords: [
+            [44.42,  0.10], // confluence with Garonne near Langon
+            [44.38, -0.07], // Budos area
+            [44.33, -0.17], // Sauternes
+            [44.26, -0.31]  // upper Ciron
+        ]
+    }
+];
+ 
+function addRivers() {
+    var riverColor = '#4a90d9'; // medium blue
+ 
+    rivers.forEach(function(river) {
+        var line = L.polyline(river.coords, {
+            color: riverColor,
+            weight: 2.2,
+            opacity: 0.85,
+            dashArray: null
+        }).addTo(map);
+ 
+        var popupContent = '<div class="feature-popup">' + river.popup + '</div>';
+        line.bindTooltip(popupContent, {
+            sticky: true,
+            opacity: 1,
+            className: 'feature-tooltip'
+        });
+ 
+        // River name label near midpoint
+        var mid = river.coords[Math.floor(river.coords.length / 2)];
+        L.marker(mid, {
+            icon: L.divIcon({
+                html: '<span class="river-label">' + river.name + '</span>',
+                className: 'river-label-icon',
+                iconAnchor: [-6, 8]
+            }),
+            interactive: false,
+            zIndexOffset: 400
+        }).addTo(map);
+    });
+}
+ 
+// ── AOC boundaries ────────────────────────────────────────────────────────────
 var aocLayersByRegionId = {};
 var activeAocLayers = [];
-
+ 
 var AOC_DEFAULT_STYLE = {
     color: '#7BBFEA', weight: 1.8, opacity: 0.85,
     fillColor: 'transparent', fillOpacity: 0, dashArray: '4 3'
@@ -73,7 +228,7 @@ var AOC_SELECTED_STYLE = {
     color: '#7BBFEA', weight: 2.2, opacity: 1,
     fillColor: '#7BBFEA', fillOpacity: 0.15, dashArray: '4 3'
 };
-
+ 
 var regionToAocId = {
     'gironde':        ['bordeaux'],
     'charente':       ['cognac'],
@@ -87,7 +242,7 @@ var regionToAocId = {
     'gers':           ['armagnac'],
     'lot-et-garonne': ['buzet']
 };
-
+ 
 function loadAOCBoundaries() {
     fetch('wine_regions.geojson')
         .then(function(r) { return r.json(); })
@@ -109,60 +264,89 @@ function loadAOCBoundaries() {
                     }).addTo(map);
                 }
             }).addTo(map);
-
             map.eachLayer(function(l) {
                 if (l instanceof L.CircleMarker) l.bringToFront();
             });
         })
-        .catch(function(err) { console.warn('AOC GeoJSON failed to load:', err); });
+        .catch(function(err) { console.warn('AOC GeoJSON failed:', err); });
 }
-
+ 
 function highlightAocForRegion(regionId) {
     activeAocLayers.forEach(function(l) { l.setStyle(AOC_DEFAULT_STYLE); });
     var ids = regionToAocId[regionId] || [];
     activeAocLayers = ids.map(function(id) { return aocLayersByRegionId[id]; }).filter(Boolean);
     activeAocLayers.forEach(function(l) { l.setStyle(AOC_SELECTED_STYLE); });
 }
-
+ 
+// ── Dropdown ──────────────────────────────────────────────────────────────────
+// Markers stored so dropdown can trigger clicks
+var markersByRegionId = {};
+ 
+function populateDropdown() {
+    var select = document.getElementById('regionSelect');
+    franceData.regions.forEach(function(region) {
+        var opt = document.createElement('option');
+        opt.value = region.id;
+        opt.textContent = region.name;
+        select.appendChild(opt);
+    });
+ 
+    select.addEventListener('change', function() {
+        var id = this.value;
+        if (!id) return;
+        var region = franceData.regions.find(function(r) { return r.id === id; });
+        if (!region) return;
+        // Pan map to region
+        map.setView([region.coordinates.latitude, region.coordinates.longitude], 8, { animate: true });
+        // Open sidebar
+        displayRegionData(region);
+        highlightAocForRegion(region.id);
+        // Reset dropdown to placeholder
+        select.value = '';
+    });
+}
+ 
 // ── Markers ───────────────────────────────────────────────────────────────────
 function initializeMarkers() {
     franceData.regions.forEach(function(region) {
         var color = phaseColors[region.programPhase] || '#555555';
-
+ 
         var marker = L.circleMarker(
             [region.coordinates.latitude, region.coordinates.longitude],
             { radius: 14, fillColor: color, color: '#FFFFFF', weight: 2.5, opacity: 1, fillOpacity: 0.9 }
         ).addTo(map);
-
+ 
+        markersByRegionId[region.id] = marker;
+ 
         marker.on('click', function() {
             displayRegionData(region);
             highlightAocForRegion(region.id);
         });
-
+ 
         marker.bindTooltip(buildTooltipHTML(region), {
             direction: 'top', permanent: false, opacity: 1,
             className: 'hover-tooltip-wrapper', offset: [0, -18]
         });
-
+ 
         L.tooltip({ permanent: true, direction: 'top', className: 'region-label', offset: [0, -15] })
             .setContent(region.name)
             .setLatLng([region.coordinates.latitude, region.coordinates.longitude])
             .addTo(map);
     });
 }
-
+ 
 // ── Sidebar ───────────────────────────────────────────────────────────────────
 function displayRegionData(region) {
     var sidebar        = document.getElementById('sidebar');
     var sidebarTitle   = document.getElementById('sidebarTitle');
     var sidebarContent = document.getElementById('sidebarContent');
-
+ 
     sidebarTitle.textContent = region.name;
-
+ 
     var grapePillsHTML = region.grapes
         ? '<div class="grape-pills-container">' + buildGrapePills(region.grapes) + '</div>'
         : '';
-
+ 
     var grapeDetailsHTML = region.grapes ? region.grapes.map(function(g) {
         var c = grapeColors[g.type];
         return '<div class="grape-detail-row">' +
@@ -170,7 +354,7 @@ function displayRegionData(region) {
             '<span class="grape-detail-note">' + g.notes + '</span>' +
         '</div>';
     }).join('') : '';
-
+ 
     var html =
         '<div class="data-section">' +
             '<h3>Program Info</h3>' +
@@ -179,7 +363,6 @@ function displayRegionData(region) {
             '<div class="data-item"><div class="data-label">Earliest Replant Date</div><div class="data-value">' + region.earliestReplantDate + '</div></div>' +
             '<div class="data-item"><div class="data-label">Dominant Wine Type</div><div class="data-value">' + region.dominantWineType + '</div></div>' +
         '</div>' +
-
         '<div class="data-section">' +
             '<h3>Vineyard Data</h3>' +
             '<div class="data-item"><div class="data-label">Hectares Applied</div><div class="data-value">' + region.hectaresApplied.toLocaleString() + ' ha</div></div>' +
@@ -189,18 +372,15 @@ function displayRegionData(region) {
             '<div class="data-item"><div class="data-label">Full-Exit Growers</div><div class="data-value">' + region.fullExitGrowers.toLocaleString() + '</div></div>' +
             '<div class="data-item"><div class="data-label">Key Appellations</div><div class="data-value">' + region.keyAppellations + '</div></div>' +
         '</div>' +
-
         '<div class="data-section">' +
             '<h3>Compensation</h3>' +
             '<div class="data-item"><div class="data-label">Rate per Hectare</div><div class="data-value">&#8364;' + region.compensationRate.toLocaleString() + '</div></div>' +
             '<div class="data-item"><div class="data-label">Estimated Total</div><div class="data-value">&#8364;' + region.estimatedCompensation + 'M</div></div>' +
         '</div>' +
-
         '<div class="data-section">' +
             '<h3>Climate &amp; Terroir</h3>' +
             '<p class="notes-text">' + (region.climate || 'No data available.') + '</p>' +
         '</div>' +
-
         '<div class="data-section">' +
             '<h3>Key Grape Varieties</h3>' +
             grapePillsHTML +
@@ -212,27 +392,24 @@ function displayRegionData(region) {
                 '<span class="grape-legend-text">White wine grape</span>' +
             '</div>' +
         '</div>' +
-
         '<div class="data-section">' +
             '<h3>Winemaking &amp; Style</h3>' +
             '<p class="notes-text">' + (region.winemaking || 'No data available.') + '</p>' +
         '</div>' +
-
         '<div class="data-section">' +
             '<h3>Notes</h3>' +
             '<p class="notes-text">' + region.notes + '</p>' +
             buildPhase3Bar(region.phase3Pct) +
         '</div>';
-
+ 
     sidebarContent.innerHTML = html;
     sidebar.classList.add('active');
 }
-
-// Close sidebar
+ 
 document.getElementById('closeBtn').addEventListener('click', function() {
     document.getElementById('sidebar').classList.remove('active');
 });
-
+ 
 // ── Legend ────────────────────────────────────────────────────────────────────
 function addLegend() {
     var legend = L.control({ position: 'bottomleft' });
@@ -244,9 +421,9 @@ function addLegend() {
             'line-height:1.9', 'font-family:Arial,Helvetica,sans-serif',
             'font-style:normal', 'border-top:3px solid #BF1722'
         ].join(';');
-
-        var html = '<strong style="display:block;margin-bottom:8px;color:#00239C;font-family:Arial,Helvetica,sans-serif;font-style:normal;letter-spacing:0.05em;text-transform:uppercase;font-size:11px;">Program Phase</strong>';
-
+ 
+        var html = '<strong style="display:block;margin-bottom:8px;color:#00239C;font-family:Arial,Helvetica,sans-serif;letter-spacing:0.05em;text-transform:uppercase;font-size:11px;">Program Phase</strong>';
+ 
         Object.entries(phaseColors).forEach(function(entry) {
             var phase = entry[0], color = entry[1];
             var border = color === '#ACE1AF' ? '1px solid #7db880' : 'none';
@@ -255,29 +432,41 @@ function addLegend() {
                 '<span style="color:#1a1a2e;">' + phase + '</span>' +
             '</div>';
         });
-
-        html += '<div style="margin-top:10px;padding-top:8px;border-top:1px solid #eee;">' +
-            '<strong style="display:block;margin-bottom:6px;color:#00239C;font-family:Arial,Helvetica,sans-serif;letter-spacing:0.05em;text-transform:uppercase;font-size:11px;">Wine Regions</strong>' +
-            '<div style="display:flex;align-items:center;gap:8px;">' +
-                '<svg width="28" height="12" style="flex-shrink:0;"><line x1="0" y1="6" x2="28" y2="6" stroke="#7BBFEA" stroke-width="2" stroke-dasharray="4 3"/></svg>' +
-                '<span style="color:#1a1a2e;">AOC Boundary (approx.)</span>' +
-            '</div>' +
-        '</div>';
-
+ 
+        html +=
+            '<div style="margin-top:10px;padding-top:8px;border-top:1px solid #eee;">' +
+                '<strong style="display:block;margin-bottom:6px;color:#00239C;font-family:Arial,Helvetica,sans-serif;letter-spacing:0.05em;text-transform:uppercase;font-size:11px;">Wine Regions</strong>' +
+                '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">' +
+                    '<svg width="28" height="12" style="flex-shrink:0;"><line x1="0" y1="6" x2="28" y2="6" stroke="#7BBFEA" stroke-width="2" stroke-dasharray="4 3"/></svg>' +
+                    '<span style="color:#1a1a2e;">AOC Boundary (approx.)</span>' +
+                '</div>' +
+                '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">' +
+                    '<svg width="28" height="12" style="flex-shrink:0;"><line x1="0" y1="6" x2="28" y2="6" stroke="#4a90d9" stroke-width="2"/></svg>' +
+                    '<span style="color:#1a1a2e;">River</span>' +
+                '</div>' +
+                '<div style="display:flex;align-items:center;gap:8px;">' +
+                    '<svg width="28" height="12" style="flex-shrink:0;"><line x1="0" y1="6" x2="28" y2="6" stroke="#b09fcc" stroke-width="2" stroke-dasharray="8 5"/></svg>' +
+                    '<span style="color:#1a1a2e;">Wind</span>' +
+                '</div>' +
+            '</div>';
+ 
         div.innerHTML = html;
         return div;
     };
     legend.addTo(map);
 }
-
+ 
 // ── Init ──────────────────────────────────────────────────────────────────────
 window.addEventListener('load', function() {
     loadAOCBoundaries();
+    addRivers();
+    addWinds();
     initializeMarkers();
     addLegend();
+    populateDropdown();
     setTimeout(function() { map.invalidateSize(); }, 100);
 });
-
+ 
 window.addEventListener('resize', function() {
     map.invalidateSize();
 });
