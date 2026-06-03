@@ -104,11 +104,8 @@ function addWinds() {
             dashArray: '8 5'
         }).addTo(map);
 
-        var popupContent = '<div class="feature-popup">' + wind.popup + '</div>';
-        line.bindTooltip(popupContent, {
-            sticky: true,
-            opacity: 1,
-            className: 'feature-tooltip'
+        line.bindTooltip('<div class="feature-popup">' + wind.popup + '</div>', {
+            sticky: true, opacity: 1, className: 'feature-tooltip'
         });
 
         var lastCoord = wind.coords[wind.coords.length - 1];
@@ -121,7 +118,7 @@ function addWinds() {
         var mid = wind.coords[Math.floor(wind.coords.length / 2)];
         L.marker(mid, {
             icon: L.divIcon({
-                html: '<span class="wind-label" style="color:#b09fcc;">' + wind.name + '</span>',
+                html: '<span class="wind-label" style="color:#7c5cbf;font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:bold;white-space:nowrap;">' + wind.name + '</span>',
                 className: 'wind-label-icon',
                 iconAnchor: [-6, 8]
             }),
@@ -180,21 +177,17 @@ function addRivers() {
         var line = L.polyline(river.coords, {
             color: riverColor,
             weight: 2.2,
-            opacity: 0.85,
-            dashArray: null
+            opacity: 0.85
         }).addTo(map);
 
-        var popupContent = '<div class="feature-popup">' + river.popup + '</div>';
-        line.bindTooltip(popupContent, {
-            sticky: true,
-            opacity: 1,
-            className: 'feature-tooltip'
+        line.bindTooltip('<div class="feature-popup">' + river.popup + '</div>', {
+            sticky: true, opacity: 1, className: 'feature-tooltip'
         });
 
         var mid = river.coords[Math.floor(river.coords.length / 2)];
         L.marker(mid, {
             icon: L.divIcon({
-                html: '<span class="river-label" style="color:#4a90d9;">' + river.name + '</span>',
+                html: '<span class="river-label" style="color:#4a90d9;font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:bold;white-space:nowrap;">' + river.name + '</span>',
                 className: 'river-label-icon',
                 iconAnchor: [-6, 8]
             }),
@@ -281,7 +274,6 @@ function initializeMarkers() {
         markersByRegionId[region.id] = marker;
 
         marker.on('click', function() {
-            // Close info sidebar if open before opening region sidebar
             document.getElementById('infoSidebar').classList.remove('active');
             displayRegionData(region);
             highlightAocForRegion(region.id);
@@ -370,7 +362,7 @@ function displayRegionData(region) {
     sidebar.classList.add('active');
 }
 
-// ── Sidebar close buttons ─────────────────────────────────────────────────────
+// ── Close buttons ─────────────────────────────────────────────────────────────
 document.getElementById('closeBtn').addEventListener('click', function() {
     document.getElementById('sidebar').classList.remove('active');
 });
@@ -379,24 +371,21 @@ document.getElementById('infoCloseBtn').addEventListener('click', function() {
     document.getElementById('infoSidebar').classList.remove('active');
 });
 
-// ── Info button Leaflet control ───────────────────────────────────────────────
-// Renders a rounded square "i" button below the zoom controls (topleft).
-// Clicking it opens the info sidebar and closes the region sidebar if open.
+// ── Info button control ───────────────────────────────────────────────────────
+// Bigger button, serif i inside a circle, CSS ::after "Information" hover label
 function addInfoButton() {
     var InfoControl = L.Control.extend({
         options: { position: 'topleft' },
         onAdd: function() {
             var btn = L.DomUtil.create('div', 'info-btn-control');
-            btn.title = 'Information';
-            btn.innerHTML = '<span class="info-btn-letter">i</span>';
+            // Circle wraps the serif i; hover label comes from CSS ::after
+            btn.innerHTML = '<div class="info-btn-circle"><span class="info-btn-letter">i</span></div>';
 
             L.DomEvent.on(btn, 'click', function(e) {
                 L.DomEvent.stopPropagation(e);
-                var infoSidebar  = document.getElementById('infoSidebar');
+                var infoSidebar   = document.getElementById('infoSidebar');
                 var regionSidebar = document.getElementById('sidebar');
-                // Close region sidebar when info opens
                 regionSidebar.classList.remove('active');
-                // Toggle info sidebar
                 infoSidebar.classList.toggle('active');
             });
 
@@ -407,54 +396,34 @@ function addInfoButton() {
     new InfoControl().addTo(map);
 }
 
-// ── Combined Dropdown + Legend control (bottomleft) ───────────────────────────
+// ── Legend + Dropdown control ─────────────────────────────────────────────────
 function addLegendAndDropdown() {
     var control = L.control({ position: 'bottomleft' });
     control.onAdd = function() {
         var div = L.DomUtil.create('div', 'info legend');
         div.style.cssText = [
-            'background:#ffffff',
-            'padding:12px 16px',
-            'border-radius:4px',
-            'box-shadow:0 2px 8px rgba(0,35,156,0.15)',
-            'font-size:12px',
-            'line-height:1.9',
-            'font-family:Arial,Helvetica,sans-serif',
-            'font-style:normal',
-            'border-top:3px solid #BF1722',
-            'min-width:220px'
+            'background:#ffffff', 'padding:12px 16px', 'border-radius:4px',
+            'box-shadow:0 2px 8px rgba(0,35,156,0.15)', 'font-size:12px',
+            'line-height:1.9', 'font-family:Arial,Helvetica,sans-serif',
+            'font-style:normal', 'border-top:3px solid #BF1722', 'min-width:220px'
         ].join(';');
 
-        // ── Jump to Region label ──
         var dropLabel = document.createElement('div');
         dropLabel.style.cssText = [
-            'color:#00239C',
-            'font-family:Milker,Arial,Helvetica,sans-serif',
-            'letter-spacing:0.05em',
-            'text-transform:uppercase',
-            'font-size:11px',
-            'margin-bottom:8px',
-            'font-weight:normal',
-            'line-height:1.4'
+            'color:#00239C', 'font-family:Milker,Arial,Helvetica,sans-serif',
+            'letter-spacing:0.05em', 'text-transform:uppercase', 'font-size:11px',
+            'margin-bottom:8px', 'font-weight:normal', 'line-height:1.4'
         ].join(';');
         dropLabel.textContent = 'Jump to Region';
         div.appendChild(dropLabel);
 
-        // ── Select element ──
         var select = document.createElement('select');
         select.id = 'regionSelect';
         select.style.cssText = [
-            'width:100%',
-            'font-family:Milker,Arial,Helvetica,sans-serif',
-            'font-size:12px',
-            'color:#1a1a2e',
-            'border:1px solid #dde2f0',
-            'border-radius:3px',
-            'padding:5px 8px',
-            'background:#f4f6fb',
-            'cursor:pointer',
-            'outline:none',
-            'box-sizing:border-box'
+            'width:100%', 'font-family:Milker,Arial,Helvetica,sans-serif',
+            'font-size:12px', 'color:#1a1a2e', 'border:1px solid #dde2f0',
+            'border-radius:3px', 'padding:5px 8px', 'background:#f4f6fb',
+            'cursor:pointer', 'outline:none', 'box-sizing:border-box'
         ].join(';');
 
         var placeholder = document.createElement('option');
@@ -474,7 +443,6 @@ function addLegendAndDropdown() {
             if (!id) return;
             var region = franceData.regions.find(function(r) { return r.id === id; });
             if (!region) return;
-            // Close info sidebar if open
             document.getElementById('infoSidebar').classList.remove('active');
             map.setView([region.coordinates.latitude, region.coordinates.longitude], 8, { animate: true });
             displayRegionData(region);
@@ -484,12 +452,10 @@ function addLegendAndDropdown() {
 
         div.appendChild(select);
 
-        // ── Divider ──
         var divider = document.createElement('div');
         divider.style.cssText = 'border-top:1px solid #eee;margin:12px 0 10px 0;';
         div.appendChild(divider);
 
-        // ── Legend content ──
         var legendDiv = document.createElement('div');
         var legendHTML =
             '<strong style="display:block;margin-bottom:8px;color:#00239C;font-family:Milker,Arial,Helvetica,sans-serif;letter-spacing:0.05em;text-transform:uppercase;font-size:11px;line-height:1.4;">Program Phase</strong>';
@@ -505,7 +471,7 @@ function addLegendAndDropdown() {
 
         legendHTML +=
             '<div style="margin-top:10px;padding-top:8px;border-top:1px solid #eee;">' +
-                '<strong style="display:block;margin-bottom:6px;color:#00239C;font-family:Milker,Arial,Helvetica,sans-serif;letter-spacing:0.05em;text-transform:uppercase;font-size:11px;line-height:1.4;">Wine Regions</strong>' +
+                '<strong style="display:block;margin-bottom:6px;color:#00239C;font-family:Milker,Arial,Helvetica,sans-serif;letter-spacing:0.05em;text-transform:uppercase;font-size:11px;line-height:1.4;">Map Features</strong>' +
                 '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">' +
                     '<svg width="28" height="12" style="flex-shrink:0;"><line x1="0" y1="6" x2="28" y2="6" stroke="#7BBFEA" stroke-width="2" stroke-dasharray="4 3"/></svg>' +
                     '<span style="color:#1a1a2e;">AOC Boundary (approx.)</span>' +
@@ -525,7 +491,6 @@ function addLegendAndDropdown() {
 
         L.DomEvent.disableClickPropagation(div);
         L.DomEvent.disableScrollPropagation(div);
-
         return div;
     };
     control.addTo(map);
